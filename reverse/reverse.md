@@ -1,0 +1,764 @@
+# Crackme
+
+## 002-abexcm5
+
+尝试运行程序，发现有弹窗字符串，根据text strings referenced定位代码
+
+![image-20230113105739519](reverse.assets/image-20230113105739519.png)
+
+可以看到相等跳转指令`je`正好跳过了中间的报错代码，也就是说要让eax和0x0相等
+
+![image-20230113110910320](reverse.assets/image-20230113110910320.png)
+
+往上翻两行可以看到有两个固定的字符串在做拼接和比较(cat、cmp)，1111111是我们输入的字符串不用管。在4010CF处下断点再运行一遍。
+
+![image-20230113111105522](reverse.assets/image-20230113111105522.png)
+
+运行到进cmp之前，是我们输入的字符串与`L2C-57816784-ABEX`在进行比较，答案也就找到了。
+
+![image-20230113111340259](reverse.assets/image-20230113111340259.png)
+
+![image-20230113111620608](reverse.assets/image-20230113111620608.png)
+
+
+
+## 003-Cruehead-CrackMe-3
+
+上来一个空白界面啥也没有，人蒙了。视频看了个开头，得知是keyfile类型的题目，需要读取密钥文件。又回去读了代码，发现需要CRACKME3.KEY文件来解密
+
+![image-20230113133150354](reverse.assets/image-20230113133150354.png)
+
+然后将4021A0处的值与0x12进行了cmp，4021A0的值被注释为pBytesRead，即读取的字节数。于是在密钥文件内写入了12个1，但是没有明显变化，进行一个视频的看。
+
+![image-20230113133901862](reverse.assets/image-20230113133901862.png)
+
+有人傻了，0x12是18个字节，改了之后发现写入的1作为函数参数被压栈了，进函数看一眼。
+
+![image-20230113134706352](reverse.assets/image-20230113134706352.png)
+
+这一段是一个小加密，每次读1个字节的数据与初始值为0x41的bl异或，之后bl自增并将读的那个字节加到0x4020F9地址中。直到bl达到0x4F，也就是读14个字节后结束。
+
+![image-20230113160946726](reverse.assets/image-20230113160946726.png)
+
+出函数后将0x4020F9地址的值与0x12345678异或，然后将这个值和eax中剩下的四个字节数据进行比较，一致即可。
+
+![image-20230113162200144](reverse.assets/image-20230113162200144.png)
+
+流程上应该算是搞懂了，写注册机花了半天，好在终究是写出来了。
+
+![image-20230113162723029](reverse.assets/image-20230113162723029.png)
+
+注册机：
+
+```python
+import binascii
+# 加密过程
+# data = '3131313131313131313131313131'
+# serial = ''
+# b = 0x41
+# for i in range(0, len(data), 2):
+#     hexdata = eval('0x' + data[i:i+2])
+#     hexdata = hexdata ^ b
+#     b += 1
+#     serial += str(hex(hexdata)[2:])
+# print(serial)
+
+# 输入长度需要14位，否则需补齐，懒得写了
+name = input('<<').encode('UTF-8').hex()
+serial = 0x00
+final_name = ''
+b = 0x4E
+for i in range(len(name)-1, 0, -2):
+    hexdata = eval('0x' + name[i-1:i+1])
+    serial += hexdata
+    hexdata = hexdata ^ b
+    b -= 1
+    final_name = str(hex(hexdata)[2:]) + final_name
+
+serial ^= 0x12345678
+final_serial = ''
+# 小端序，要倒着写进去，至少折腾了半个小时，菜
+for i in range(2, len(hex(serial)), 2):
+    final_serial = hex(serial)[i:i+2] + final_serial
+final_serial = final_name + final_serial
+print(final_serial)
+```
+
+
+
+## 004-Acid Bytes.2
+
+能看出是upx加壳，但是字符串搜不到，没啥思路，看一眼视频。
+
+````
+脱壳方法：pushad后esp变动，右键CPU窗口的esp下硬件断点，F9运行后F8。右键analysis选项删除分析，还原乱码。右键->用ollydebug脱壳调试进程，保存exe文件
+# 经验证win10无效
+````
+
+先看下一题
+
+
+
+## 005-Andrnalin.1
+
+尝试运行程序，按照弹窗的字符搜索字符串定位到代码附近。
+
+![image-20230116112430846](reverse.assets/image-20230116112430846.png)
+
+往上翻一点有个je跳转，效果是把success部分跳过，那目标也就明确了，
+
+![image-20230116112536710](reverse.assets/image-20230116112536710.png)
+
+方法1：je指令修改为jne指令(84改85)
+
+方法2：继续向上发现了一个cmp函数的压栈操作，两个参数分别是ecx寄存器的值和固定的字符串
+
+![image-20230116112835878](reverse.assets/image-20230116112835878.png)
+
+下断点运行之后可以发现ecx就是我们输入的字符串，直接比较。
+
+![image-20230116113327554](reverse.assets/image-20230116113327554.png)
+
+**vb正确的返回值不是1，而是-1**
+
+
+
+## 006-ArturDents-CrackMe#2
+
+搜索字符串，找到了一个"You did it"，跟进去看看。重点在[ebx]和dl的cmp上。
+
+![image-20230116134546579](reverse.assets/image-20230116134546579.png)
+
+**GetDlgItemTextA:从控件中取参的函数**
+
+这里把用户名和序列号都取出来了，分别放进了eax寄存器和ebx寄存器中。对eax所存地址处的值逐字符放进dl，减去cl，再与ebx相同位置的值作比较，最后cl自减。
+
+![image-20230116141759391](reverse.assets/image-20230116141759391.png)
+
+![image-20230116141636927](reverse.assets/image-20230116141636927.png)
+
+注册机：
+
+```python
+def crackme6():
+    name = 'wa1ex'
+    serial = ''
+    cl = 0x5
+    for i in name:
+        temp = chr(ord(i) - cl)
+        serial += temp
+        cl -= 1
+    print(serial)
+```
+
+
+
+## 007-reg
+
+运行后多了一个dll文件，没找到切入点，看视频。通过智能搜索来搜索字符串，定位到大体的判断代码。通过参数压栈调用函数的参数，判断序列号对比是在哪个函数中进行的。
+
+![image-20230116163645262](reverse.assets/image-20230116163645262.png)
+
+方法1：je指令修改为jne指令(74改75)
+
+方法2：进算法call后修改初始化堆栈的操作如下：
+
+```
+mov eax,1
+retn
+```
+
+方法3：往下跟进，将日期和用户名压栈并执行函数后，ecx获取到了一串字符串。可以猜测日期和用户名是序列号的生成要素，因此猜测生成的字符串即为序列号。
+
+![image-20230116164440519](reverse.assets/image-20230116164440519.png)
+
+![image-20230116164612376](reverse.assets/image-20230116164612376.png)
+
+破解成功，确实是该字符串。
+
+![image-20230116165107006](reverse.assets/image-20230116165107006.png)
+
+**看下来发现，我对着一些无关紧要的点消耗了过长的时间，以及对于寄存器和栈帧之间的操作不敏感。例如下面的lea指令，在这三个汇编指令运行后，edx中会得到call里面计算出的地址，在栈帧中查看该地址可以省下跟进函数中查看的时间，对进一步分析往往有很大帮助。**
+
+![image-20230116162921705](reverse.assets/image-20230116162921705.png)
+
+
+
+## 008-Afkayas.1
+
+根据字符串搜索，然后因为没有找到函数的精确位置，就往上翻了几十行下了个断点。
+
+![image-20230116173525426](reverse.assets/image-20230116173525426.png)
+
+连着push了三个参数后，call了edi处的strcat函数。
+
+![image-20230116173651370](reverse.assets/image-20230116173651370.png)
+
+效果是把0x00401B70处的AKA-和ecx里的487774连起来了。
+
+![image-20230116173816723](reverse.assets/image-20230116173816723.png)
+
+下面紧跟了一个strcmp，猜测这个就是序列号。
+
+![image-20230116174506850](reverse.assets/image-20230116174506850.png)
+
+猜想正确。
+
+![image-20230116174549111](reverse.assets/image-20230116174549111.png)
+
+要写注册机主要是要搞清楚这个487774是哪里来的。
+
+以下代码输出了这个487774：首先获取了字符串长度并乘上0x17CFB，再加上首字符的ascii码值，最后通过vbaStrI4函数将前面的结果转换为了487774。在python中可以通过encode函数实现这个转换。
+
+![image-20230116181943673](reverse.assets/image-20230116181943673.png)
+
+注册机：
+
+```python
+def crackme8():
+    name = 'walex'
+    length = len(name)
+    temp = 'AKA-' + str(str(length * 0x17CFB + ord(name[0])).encode())[2:-1]
+    print(temp)
+```
+
+
+
+## 009-Boonz-KeygenMe#1
+
+**DialogBoxParamA:主界面函数**
+
+![image-20230116194933753](reverse.assets/image-20230116194933753.png)
+
+根据报错提示，搜索Bad Boy字符串。这里直接看到了一个cmp和je跳转，决定了破解的结果。
+
+![image-20230117102832596](reverse.assets/image-20230117102832596.png)
+
+往上翻到401208位置，第一次出现了用户名wa1ex，并进行了第一段变形。
+
+![image-20230117103222698](reverse.assets/image-20230117103222698.png)
+
+第二段变形。
+
+![image-20230117103307717](reverse.assets/image-20230117103307717.png)
+
+第三段变形。
+
+![image-20230117103343730](reverse.assets/image-20230117103343730.png)
+
+这几个变形结果被cat函数连了起来，得到了一个很像序列号的字符串。
+
+![image-20230117103446774](reverse.assets/image-20230117103446774.png)
+
+验证成功。
+
+![image-20230117103844913](reverse.assets/image-20230117103844913.png)
+
+注册机：
+
+```python
+def crackme9():
+    name = 'wa1ex'
+    serial = 'Bon-'
+    mutli = 0xffffffff
+    limit = mutli + 1
+    ebx = 0
+    for i in name:
+        eax = ord(i)-0x19
+        ebx -= eax
+    ebx = limit + ebx
+    serial = serial + hex(ebx)[2:].upper() + '-'
+
+    eax = (ebx * ebx) & mutli
+    ebx = (ebx * eax) & mutli
+    serial = serial + hex(ebx)[2:].upper() + '-'
+
+    eax = ebx = ecx = 0x40E0F8
+    ecx = (ecx * ebx) & mutli
+    ecx -= eax
+    serial = serial + hex(ecx)[2:].upper()
+    print(serial)
+ 
+```
+
+
+
+## 010-ceycey
+
+很怪，完全跑不动的代码，不知道是不是因为加壳的问题。（有猪栈平衡法断点下错位置了）
+
+找到OEP后dump出来，出现如下报错，据ede的说法是需要重建IAT表。
+
+![image-20230118100252999](reverse.assets/image-20230118100252999.png)
+
+重建过程中遇到两个问题，一个是RVA为5B604的地方并未找到函数名，一个是在ImpREC软件中右键无效函数时并未跳转到该函数的代码中。
+
+
+
+## 011-wocy.1
+
+搜索字符串。
+
+![image-20230118112902340](reverse.assets/image-20230118112902340.png)
+
+方法1：jnz改jz（75改74）
+
+方法2：往上拉一段打断点，一路F8，发现输进来的字符串在40164D里reverse了一次。
+
+![image-20230118113016786](reverse.assets/image-20230118113016786.png)
+
+![image-20230118113154716](reverse.assets/image-20230118113154716.png)
+
+终。
+
+![image-20230118113250387](reverse.assets/image-20230118113250387.png)
+
+
+
+## 012-ACG-crcme1
+
+去除nag：搜索字符串，函数参数push处断点，查看调用栈追溯如下。方式：jnz改jmp或更改cmp中的0x1。
+
+![image-20230118160222960](reverse.assets/image-20230118160222960.png)
+
+此处对用户名进行了一系列操作，把结果存到了eax中入栈。
+
+![image-20230131164031974](reverse.assets/image-20230131164031974.png)
+
+紧接着开始操作输入的系列号，成功的条件是eax最终等于0，因此可以倒推到4012CD处。剩下的问题就是如何将输入的数，经过4012A8到4012CB的变换，得到我们需要的数。
+
+![image-20230131164135875](reverse.assets/image-20230131164135875.png)
+
+经过尝试后发现，变换前后的结果是一致的，问题迎刃而解了。
+
+![image-20230131164630773](reverse.assets/image-20230131164630773.png)
+
+![image-20230131164638651](reverse.assets/image-20230131164638651.png)
+
+如图
+
+![image-20230131165442171](reverse.assets/image-20230131165442171.png)
+
+注册机：
+
+```python
+def crackme12():
+    name = 'wa1ex'
+    serial = '123456'
+    al = 0
+    for i in range(len(name)):
+        bl = ord(name[i])
+        al += bl
+    temp1 = (al << 3) ^ 0x515A5
+
+    # 字符串变整数
+    # print(serial)
+    # eax = 0xA
+    # edi = 0
+    # for i in range(len(serial)):
+    #     bl = ord(serial[i]) - 0x30
+    #     edi = eax * edi + bl
+    # print(edi)
+    # edi ^= 0x87CA
+    # ebx = edi
+    # eax = temp1 + ebx
+    # eax ^= 0x797E7
+    eax = 0x797E7
+    ebx = eax - temp1
+    edi = ebx
+    edi ^= 0x87CA
+    print(edi)
+```
+
+
+
+## 013-Acid burn
+
+这题给我的感觉很奇怪，但ede说是很简单，一定是ede的问题。
+
+nag：字符串搜索下断点到42F797处，发现这个call函数会弹窗，跟进
+
+![image-20230131180924830](reverse.assets/image-20230131180924830.png)
+
+来到42A1A8处，查看调用栈，go
+
+![image-20230131181431814](reverse.assets/image-20230131181431814.png)
+
+来到地址425643，发现了je指令，改为jmp并dump程序。
+
+![image-20230131181448276](reverse.assets/image-20230131181448276.png)
+
+再次搜索失败后弹出的字符串，往上拉到42F998处下断点。一通找，在402771处发现了eax的进一步变化，离谱。
+
+![image-20230131195219088](reverse.assets/image-20230131195219088.png)
+
+上面那行去掉，翻了一个小时的东西还是得推翻重来，悲。据ede一线嘲笑，eax * 0x29 * 2的实现代码在这个位置。由于在这个部分栈内没有出现9758的字符串，也没有乘2的mul，我就忽视了这部分，直接跟进到了栈中出现9758的函数里去，太痛苦了，我释放忍术。
+
+![image-20230201101748058](reverse.assets/image-20230201101748058.png)
+
+下图位置引入了CW和CRACKED两个字符串，这里memory换成long->address with ascii dump更容易看一些
+
+![image-20230201102601366](reverse.assets/image-20230201102601366.png)
+
+最后把以上连起来就是序列号
+
+![image-20230201103435658](reverse.assets/image-20230201103435658.png)
+
+注册机：
+
+```python
+def crackme13():
+    name = 'wa1ex'
+    # temp1 = (ord(name[0]) << 3) - ord(name[0])
+    # print(hex(temp1))
+    # temp2 = (ord(name[1]) << 4)
+    # temp1 += temp2
+    # print(hex(temp1))
+    eax = ord(name[0]) * 0x29
+    eax *= 2
+    serial = 'CW-' + str(eax) + '-CRACKED'
+    print(serial)
+```
+
+
+
+## 014-Splish
+
+一个nag、一个hardcode还有一个序列号
+
+nag：加载中间按F12停住，查看栈调用没找到调用函数。调整栈窗口以EBP为基，找EBP+4的位置，跟过去把push和call全置成nop。
+
+![image-20230201174403057](reverse.assets/image-20230201174403057.png)
+
+hardcode：搜索字符串定位到这一段打断点，403215是getwindowtextA获取到的输入，那401353处就是hardcode，结果进去一看是HardCoded，只能说确实挺hardcode的。
+
+![image-20230201175937932](reverse.assets/image-20230201175937932.png)
+
+![image-20230201175905998](reverse.assets/image-20230201175905998.png)
+
+serial：用户名经过如下变换写入403258
+
+![image-20230201192527238](reverse.assets/image-20230201192527238.png)
+
+序列号经过如下变换写入40324D
+
+![image-20230201192626256](reverse.assets/image-20230201192626256.png)
+
+放大系数选6、7、8、10、11均可
+
+![image-20230201192412328](reverse.assets/image-20230201192412328.png)
+
+注册机：
+
+```python
+def crackme14():
+    name = 'wa1ex'
+    ecx = 10
+    ebx = 0
+    serial = ''
+    for i in name:
+        edx = ((ord(i) % ecx) ^ ebx) + 0x2
+        if edx > 0xA:
+            edx -= 0xA
+        ebx += 1
+        edx += 6 * 0xA
+        serial += chr(edx)
+    print(serial)
+    # for i in serial:
+    #     edx = ord(i) % ecx
+```
+
+
+
+## 015-Brad Soblesky.1
+
+硬编码
+
+![image-20230202170708976](./reverse.assets/image-20230202170708976.png)
+
+![image-20230202170736074](./reverse.assets/image-20230202170736074.png)
+
+
+
+## 016-fty_crkme3
+
+栈平衡法：首先F8，在ESP处打硬件断点，F9F8就到了OEP所在的位置，在该位置进行ollydebug的调试脱壳得到dump.exe。将该位置-0x400000填入import REC，获取IAT表并查找无效函数修改，转储到dump.exe中得到dump_.exe文件。终
+
+看完了，回头写个感想：抽象，真的抽象。写那么长，看着贼麻烦，结果是不写循环的屑。
+
+整个程序分成三部分：第一部分是输入字符串是否符合标准的检验；第二部分是把字符串的数字部分拼起来；第三部分是验证数字是否符合预期
+
+第一部分：没啥好说的，要求字符串共9位，除第3、7位是-以外都是数字
+
+![image-20230209103803587](./reverse.assets/image-20230209103803587.png)
+
+第二部分：看一次中间的循环，从12-456-89中取单个字符，然后mov一个0x1作为字符串长度，call 40284C，然后把结果存到eax里
+
+![image-20230209104322185](./reverse.assets/image-20230209104322185.png)
+
+40284C：进来之后al和dl相加（字符串长度相加），和预期长度cl对比，一致的话就把字符拼到后面去。
+
+444C2A：看着像个复制，没细看
+
+![image-20230209104622079](./reverse.assets/image-20230209104622079.png)
+
+结果：
+
+![image-20230209092052990](./reverse.assets/image-20230209092052990.png)
+
+第三部分：三个call，第一个call取出字符串中的一个数字，第二个没什么动静
+
+![image-20230209112400141](./reverse.assets/image-20230209112400141.png)
+
+第三个call 444B20：这个-2+1是真的乐9926315，imul 6次，即7次方，然后加回edi
+
+![image-20230209111635092](./reverse.assets/image-20230209111635092.png)
+
+最后cmp的是esi和edi，发现esi是在407B64处取的值，把字符串变成了数。
+
+![image-20230209112603994](./reverse.assets/image-20230209112603994.png)
+
+即：找到一个7位数，其每位的7次方和等于其本身。
+
+![image-20230209133622280](./reverse.assets/image-20230209133622280.png)
+
+注册机：
+
+```python
+def crackme16():
+    serial = '12-456-89'
+    total = 0
+    for i in range(1000000, 9999999):
+        current = i
+        while current != 0:
+            res = current % 10
+            total += res ** 7
+            current //= 10
+
+        if total == i:
+            print(str(i)[0:2] + '-' + str(i)[2:5] + '-' + str(i)[5:7])
+        total = 0
+        # 1741725
+        # 4210818
+        # 9800817
+        # 9926315
+
+```
+
+
+
+## 017-Cabeca
+
+本来极其简单的硬编码题目，因为我把十六进制转十进制的call错认成了加密的call，一层层的追进去细读，导致浪费了一个上午以及现在写文档的10分钟，淦。
+
+![image-20230214194101121](./reverse.assets/image-20230214194101121.png)
+
+![image-20230214194305287](./reverse.assets/image-20230214194305287.png)
+
+![image-20230214194321284](./reverse.assets/image-20230214194321284.png)
+
+![image-20230214194438606](./reverse.assets/image-20230214194438606.png)
+
+序列号1、2是12506和178
+
+![image-20230214194535806](./reverse.assets/image-20230214194535806.png)
+
+
+
+## 018-crackme_0006
+
+每次做题的时候很烦，做完了回头一看：不是**挺简单的吗，怎么花了这么长时间
+
+如ede文档所说，此题的新奇之处在于以盘符作为local4生成的由来。对我而言还有一个初见的东西，就是通过idiv生成索引，再根据索引从硬编码的字符串中取值生成serial。
+
+还有一点是在用wa1ex为用户名时，注册机正常运行；换成soundfuture之后，serial就错了，所以soundfuture真不行。好吧，其实是soundfuture由于比较长，在mul中用到了edx寄存器来存乘积的高位，而wa1ex用不着，并且我也确实不记得mul的这个定义了，对着ollydebug和python比对了半天才解决了问题。
+
+![image-20230216112725363](./reverse.assets/image-20230216112725363.png)
+
+![image-20230216113205404](./reverse.assets/image-20230216113205404.png)
+
+```python
+def crackme18():
+    name = 'wa1ex'
+    local1 = 'BA7069C6'
+    local1_after_call = 'A71809C1'
+    local2_after_call = '4E301383'
+    # 根据盘符和一系列变换得到的local4
+    local4 = 0x625FBB16
+    eax = 1
+    edx = 0
+    for i in name:
+        eax *= ord(i)
+        if eax > 0xFFFFFFFF:
+            edx = eax // 0x100000000
+        else:
+            edx = 0
+        eax += edx
+        eax &= 0xFFFFFFFF
+        print(hex(eax))
+    eax = rol(eax)
+    eax |= local4
+    eax &= 0xFFFFFFF
+    key_402073 = '071362de9f8ab45c'
+    serial = ''
+    while eax != 0:
+        ecx = 0x10
+        index = eax % ecx
+        serial += key_402073[index]
+        eax //= 0x4
+        print(eax)
+    print(serial)
+```
+
+
+
+## 019-Acid Bytes.3
+
+浪费感情。
+
+![image-20230530175942381](./reverse.assets/image-20230530175942381.png)
+
+![image-20230530180056001](./reverse.assets/image-20230530180056001.png)
+
+
+
+## 020-cosh.3
+
+![image-20230531112533280](./reverse.assets/image-20230531112533280.png)
+
+下面这段将用户名和密码分别进行了变形，变形完如果一致就通过。由于是xor异或，不需要细看实现，直接再次异或即可。
+
+![image-20230531112632989](./reverse.assets/image-20230531112632989.png)
+
+![image-20230531112109611](./reverse.assets/image-20230531112109611.png)
+
+```python
+def crackme20():
+    raw_name = input("<<")
+    name = ''
+    cl = 1
+    for i in raw_name:
+        bl = ord(i)
+        bl = cl ^ bl
+        name += chr(bl)
+        cl += 1
+    print(name)
+
+    cl = 0xA
+    password = ''
+    for i in name:
+        bl = ord(i)
+        password += chr(cl ^ bl)
+        cl += 1
+    print(password)
+```
+
+
+
+## 021-DIS[IP]-Serialme
+
+比较指令的格式是：
+
+```
+CMP destination,source
+```
+
+其中，destination和source可以是寄存器，内存单元或立即数，但不能同时是内存单元。
+
+比较指令会影响溢出、符号、零、进位、辅助进位和奇偶标志位。
+
+如果比较的是两个无符号数，则零标志位和进位标志位表示的两个操作数之间的关系如下表所示：
+
+| CMP结果               | ZF   | CF   | 含义 |
+| :-------------------- | :--- | :--- | :--- |
+| 目的操作数 < 源操作数 | 0    | 1    | 小于 |
+| 目的操作数 > 源操作数 | 0    | 0    | 大于 |
+| 目的操作数 = 源操作数 | 1    | 0    | 相等 |
+
+![image-20230531142407138](./reverse.assets/image-20230531142407138.png)
+
+唯一一个小问题是在`mov cx,[eax*2+0x40301A]`部分，在内存中读的两个字节在寄存器中会逆序，头疼的大小端。
+
+试了一下，用户名最长五位，否则0x40301A处存在的不是输入的PASS，而是用户名。
+
+![image-20230531143817779](./reverse.assets/image-20230531143817779.png)
+
+```
+def crackme21():
+    raw_name = 'wa1ex'
+    password = ''
+    a = 0
+    for i in raw_name:
+        value = ord(i)
+        if value == 0x5A:
+            value -= 1
+        if value == 0x7A:
+            value -= 1
+        if value == 0x39:
+            value -= 1
+        eax = 0x61 + a
+        bl = value + 1
+        bh = eax
+        a += 1
+        password += chr(bl) + chr(bh)
+    print(password)
+```
+
+
+
+## 022-CM_2
+
+jle指令是一种**条件跳转指令**，它用于在结果小于或等于（或不大于）时跳转到指定的地址。jle指令的格式是：
+
+```
+JLE label
+```
+
+其中，label是一个标号，表示要跳转的目标地址。
+
+jle指令的结果受到cmp指令的影响，因为cmp指令会根据比较结果修改零标志位（ZF）、符号标志位（SF）和溢出标志位（OF）。
+
+如果cmp指令比较的两个操作数相等，那么ZF会被置为1，此时jle指令会跳转到label处执行
+
+如果cmp指令比较的两个操作数不相等，那么ZF会被置为0，此时jle指令会根据SF和OF的关系决定是否跳转。
+
+如果SF和OF不相等，那么表示结果为负数，此时jle指令会跳转到label处执行。
+
+如果SF和OF相等，那么表示结果为正数或零，此时jle指令不会跳转，而是继续执行下一条指令。
+
+比如这里实现的效果是：不大于5跳转，即要求用户名密码均大于5
+
+![image-20230531144526130](./reverse.assets/image-20230531144526130.png)
+
+什么沙雕东西，嗯编码。
+
+![image-20230531151538480](./reverse.assets/image-20230531151538480.png)
+
+```
+def crackme22():
+    password = '6287-A'
+    
+```
+
+
+
+## 0023-TraceMe
+
+从第四个字母（0x3）开始，每个字母乘一个特定的值，积的和就是序列号。
+
+![image-20230531154600769](./reverse.assets/image-20230531154600769.png)
+
+```
+def crackme23():
+    raw_name = 'fatestede'
+    esi = 0
+    bl_list = [0x0c, 0x0a, 0x13, 0x09, 0x0c, 0x0b, 0x0a, 0x08]
+    for i in range(3, len(raw_name)):
+        dl = ord(raw_name[i])
+        bl = bl_list[i-3]
+        dl = dl * bl
+        esi += dl
+    print(esi)
+```
+
+肥逼ede！
