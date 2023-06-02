@@ -257,4 +257,49 @@ def crackme23():
     print(esi)
 
 
-crackme23()
+def crackme24():
+    password = 'GGGGGGGGGGGGGGGG'
+
+
+def crackme25():
+    username = 'DiKeN' + 'wa1ex'
+    checkcode = '3081071428'
+    # eax = 0xffffffff
+    # for i in username:
+    #     eax ^= ord(i)
+    edx = 0
+    # 算是字符串到int吧
+    for i in checkcode:
+        edx = 10*edx + ord(i) - 0x30
+    print(edx)
+
+
+def crackme26():
+    name = 'wa1ex'
+    esi = 0
+    for i in name:
+        edx = ord(i)
+        ebx = edx
+        ebx *= edx
+        esi += ebx
+        ebx = edx
+        ebx //= 2
+        ebx += 3
+        ebx *= edx
+        ebx -= edx
+        esi += ebx
+        esi *= 2
+    print(hex(esi)[0:2] + (10-len(hex(esi)))*'0' + hex(esi)[2:])
+
+
+def crackme29():
+    name = 'wa1ex'
+    serial = ''
+    edi = 0
+    for i in name:
+        serial += chr(ord(i) - edi)
+        edi += 1
+    print(serial)
+
+
+crackme29()
