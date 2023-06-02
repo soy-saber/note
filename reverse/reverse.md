@@ -482,7 +482,9 @@ def crackme14():
 
 ## 016-fty_crkme3
 
+```
 栈平衡法：首先F8，在ESP处打硬件断点，F9F8就到了OEP所在的位置，在该位置进行ollydebug的调试脱壳得到dump.exe。将该位置-0x400000填入import REC，获取IAT表并查找无效函数修改，转储到dump.exe中得到dump_.exe文件。终
+```
 
 看完了，回头写个感想：抽象，真的抽象。写那么长，看着贼麻烦，结果是不写循环的屑。
 
@@ -859,11 +861,9 @@ Serial为硬编码的code。
 
 ![image-20230602103214364](./reverse.assets/image-20230602103214364.png)
 
-搜了一下好像是系统问题
+上面划掉，重建找错表了，原exe有大量无效函数，光改这一条还不行，与16题不太一样，遂搁置。
 
-![image-20230602104032982](./reverse.assets/image-20230602104032982.png)
-
-摸了
+![image-20230602150654429](./reverse.assets/image-20230602150654429.png)
 
 
 
@@ -884,3 +884,73 @@ checkcode加载到了19F812的位置。
 ![image-20230602111238559](./reverse.assets/image-20230602111238559.png)
 
 ![image-20230602112109349](./reverse.assets/image-20230602112109349.png)
+
+
+
+## 030-Acid Bytes.4
+
+upx的壳，脱了之后又开始ntdll了。
+
+![image-20230602134607093](./reverse.assets/image-20230602134607093.png)
+
+还好这个只有这一个无效函数，常规操作脱壳。
+
+根据字符串搜索定位到入口点
+
+![image-20230602152517294](./reverse.assets/image-20230602152517294.png)
+
+![image-20230602154101045](./reverse.assets/image-20230602154101045.png)
+
+又是个不写循环的b
+
+![image-20230602155359765](./reverse.assets/image-20230602155359765.png)
+
+![image-20230602164255349](./reverse.assets/image-20230602164255349.png)
+
+```
+def crackme30():
+    name = 'wa1ex1'
+    esi = 0
+    for i in range(0, 6):
+        eax = ord(name[i])
+        esi += 2 * eax
+        print(hex(esi))
+    serial = esi + len(name) * 2
+    print(serial)
+```
+
+
+
+## 031-Cruehead.1
+
+name：40218E，serial：40217E
+
+![image-20230602165723174](./reverse.assets/image-20230602165723174.png)
+
+找到了输入的地方，但往下跟的时候跟进了user32里，直接傻眼。尝试在输入数据的内存处下硬件断点，但这个位置被访问了很多次，一直找不到判断的地方。最后是直接F9，看程序停在哪里，然后看到了下面这段。
+
+![image-20230602171248964](./reverse.assets/image-20230602171248964.png)
+
+重新梳理了一下，md发现这段就在输入数据的下面，亏麻了。
+
+name处小写转大写
+
+![image-20230602172609702](./reverse.assets/image-20230602172609702.png)
+
+name的变形是叠加，异或了0x5678
+
+serial的变形是字符串转十进制，异或了0x1234
+
+![image-20230602174038718](./reverse.assets/image-20230602174038718.png)
+
+```
+def crackme31():
+    name = 'fatestede'
+    name = name.upper()
+    edi = 0
+    for i in name:
+        edi += ord(i)
+    print(hex(edi))
+    serial = edi ^ 0x5678 ^ 0x1234
+    print(serial)
+```
