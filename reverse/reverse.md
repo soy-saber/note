@@ -762,3 +762,125 @@ def crackme23():
 ```
 
 肥逼ede！
+
+在写下上面这段之后去看了ede的文档，发现我对这道题的认知还有很大的不足，原因在于我找到入口点的方式太碰巧了。我搜完字符串判断出这段没有check逻辑，直接往下拉了一段看到两个gettext，就很诡异的定位到了入口点，阳寿局。
+
+
+
+## 024-reverseMe
+
+![image-20230601110557920](./reverse.assets/image-20230601110557920.png)
+
+创建Keyfile.dat文件，16个G即可。
+
+![image-20230601111431424](./reverse.assets/image-20230601111431424.png)
+
+
+
+## 025-CRC-32crackme
+
+搜索字符串不能直接搜到。因此在输入错误的用户名/验证码后F12，Alt+K追溯调用函数，找到事发现场。
+
+![image-20230601134307406](./reverse.assets/image-20230601134307406.png)
+
+用户名前面加了`DikeN`，验证码前面加了`0`，对checkcode的变形就是字符串变整数，怪的是看不懂验证逻辑是什么。
+
+看了半天倒是确定了验证逻辑就是esi和eax，但不知道esi是哪里来的，往上翻了一段发现在处理用户名的时候有一句`mov esi eax`，无语
+
+![image-20230601150820850](./reverse.assets/image-20230601150820850.png)
+
+esi是用户名串的地址，edi是内存中的固定地址`403E1A`，每个字符的低位都将乘4后以edi为基准进行一个ebx的赋值。但这个寻找的范围有点大，看ede的文档是装了个插件，注册机我直接摸。
+
+![image-20230601152107198](./reverse.assets/image-20230601152107198.png)
+
+![image-20230601153513878](./reverse.assets/image-20230601153513878.png)
+
+
+
+## 026-KeygenMe
+
+爷还没开debug，你在这骗鬼呢
+
+![image-20230601154904245](./reverse.assets/image-20230601154904245.png)
+
+简单看了一下是用户名变形去对应checkcode。出现了一个问题，我用户名变形完对应不到可输入字符。
+
+![image-20230601163304141](./reverse.assets/image-20230601163304141.png)
+
+硬来的时候忘了注意内存里排序的问题，又是tm20分钟没了，还想了半天。
+
+![image-20230601164909986](./reverse.assets/image-20230601164909986.png)
+
+![image-20230601164604592](./reverse.assets/image-20230601164604592.png)
+
+![image-20230601164715208](./reverse.assets/image-20230601164715208.png)
+
+```
+def crackme26():
+    name = 'wa1ex'
+    esi = 0
+    for i in name:
+        edx = ord(i)
+        ebx = edx
+        ebx *= edx
+        esi += ebx
+        ebx = edx
+        ebx //= 2
+        ebx += 3
+        ebx *= edx
+        ebx -= edx
+        esi += ebx
+        esi *= 2
+    # 底下这十六进制不全是可显示字符，无语子，真下头
+    print(hex(esi)[0:2] + (10-len(hex(esi)))*'0' + hex(esi)[2:])
+```
+
+
+
+## 027-MexeliteCRK1
+
+这道题由于搜索到字符串但定位不到check流程，因此学习了一下下消息断点然后Alt+K跟踪堆栈的定位方法，好处是学到了点新东西，坏处是被ede狗叫了。
+
+Serial为硬编码的code。
+
+![image-20230602094050546](./reverse.assets/image-20230602094050546.png)
+
+
+
+## 028-ArturDents-CrackMe#3
+
+一进去不管是搜字符串还是F9都没有找到什么有价值的东西，遂看视频教程发现有壳，根据栈平衡法脱壳。
+
+```
+起点为ESP单独变动的操作，终点在灰色加壳代码段，在终点使用ollydebug脱壳调试
+```
+
+脱壳完之后发现还是用不了，尝试重建发现没有无效函数。
+
+![image-20230602103214364](./reverse.assets/image-20230602103214364.png)
+
+搜了一下好像是系统问题
+
+![image-20230602104032982](./reverse.assets/image-20230602104032982.png)
+
+摸了
+
+
+
+## 029-figugegl.1
+
+搜索字符串定位到check算法的位置。
+
+用户名加载到了19F827的位置。
+
+![image-20230602105600405](./reverse.assets/image-20230602105600405.png)
+
+checkcode加载到了19F812的位置。
+
+![image-20230602105859877](./reverse.assets/image-20230602105859877.png)
+
+有点意思的是，验证的有效长度其实只到用户名长度，Serial再长也无所谓。
+
+![image-20230602111238559](./reverse.assets/image-20230602111238559.png)
+
+![image-20230602112109349](./reverse.assets/image-20230602112109349.png)
