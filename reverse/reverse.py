@@ -302,4 +302,57 @@ def crackme29():
     print(serial)
 
 
-crackme29()
+def crackme30():
+    name = 'fatestede'
+    esi = 0
+    for i in range(0, 6):
+        eax = ord(name[i])
+        esi += 2 * eax
+        print(hex(esi))
+    serial = esi + len(name) * 2
+    print(serial)
+
+
+def crackme31():
+    name = 'walex'
+    name = name.upper()
+    edi = 0
+    for i in name:
+        edi += ord(i)
+    print(hex(edi))
+    serial = edi ^ 0x5678 ^ 0x1234
+    print(serial)
+
+
+def crackme32():
+    name = 'wa1ex'
+    esi = 0
+    for i in name:
+        edx = ord(i)
+        ebx = edx * edx
+        esi += ebx
+        ebx = (edx >> 1)
+        esi = esi + ebx - edx
+    print(esi)
+
+
+def crackme33():
+    name = 'wa1ex'
+    esi = 0
+    for i in name:
+        eax = ord(i)
+        ebx = eax
+        ebx = (ebx-0x17) * (eax-0x11)
+        esi += ebx
+    print(esi)
+
+
+def crackme36():
+    name = 'fatestede'
+    esi = 0
+    for i in name:
+        eax = ord(i)
+        esi += eax
+    serial = 0x499602D2 * esi
+    print(str(serial)[0:3] + '-' + str(serial)[4:8] + '-' + str(serial)[9:])
+crackme36()
