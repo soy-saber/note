@@ -1087,3 +1087,30 @@ def crackme36():
     print(str(serial)[0:3] + '-' + str(serial)[4:8] + '-' + str(serial)[9:])
 ```
 
+
+
+## 037-fireworx.2
+
+忘了字符串前4个字节的位置是字符串长度，看程序折腾了半天，又是改寄存器又是改内存的，md一出来serial没变，人麻了。
+
+serial算法：取存在栈地址里的内存数据，放到esi上
+
+![image-20230607174749354](./reverse.assets/image-20230607174749354.png)
+
+![image-20230607174637206](./reverse.assets/image-20230607174637206.png)
+
+超级肥的ede！
+
+![image-20230607175121252](./reverse.assets/image-20230607175121252.png)
+
+```python
+def crackme37():
+    name = 'wa1ex'
+    serial = name + name + '625g72'
+    print(serial)
+```
+
+
+
+## 038-Eternal Bliss.3
+

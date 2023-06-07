@@ -355,4 +355,11 @@ def crackme36():
         esi += eax
     serial = 0x499602D2 * esi
     print(str(serial)[0:3] + '-' + str(serial)[4:8] + '-' + str(serial)[9:])
-crackme36()
+
+
+def crackme37():
+    name = 'wa1ex'
+    serial = name + name + '625g72'
+    print(serial)
+
+crackme37()
