@@ -1114,3 +1114,93 @@ def crackme37():
 
 ## 038-Eternal Bliss.3
 
+你管这距离叫一个函数？
+
+![image-20230608093347086](./reverse.assets/image-20230608093347086.png)
+
+vb很烦的就是我不知道他这段在干嘛，那段又在干嘛，离得又远，只能通过不断地反复来确定哪一段是我们需要重点关注的。
+
+这题首先比较恶心的是除了最后cmp的跳转以外，路上还有其他的失败跳转，导致我下在最后cmp前的断点直接没生效，像下面这个位置：它自己累加了七个数之后，和某个东西cmp(ss:[ebp-0x40])来决定是否跳转。我猜测这里的"某个东西"应该是根据我的输入得到的，这下还得往上翻，该死
+
+![image-20230608100133221](./reverse.assets/image-20230608100133221.png)
+
+往上翻完了才发现这几个数是怎么存进去的。
+
+![image-20230608101804722](./reverse.assets/image-20230608101804722.png)
+
+终于从这个鬼地方找到输入值怎么存进去的了，还好ebp没变过。实际效果很简单，就是字符取ascii累加。
+
+![image-20230608104237074](./reverse.assets/image-20230608104237074.png)
+
+由于上面的cmp比对的是两个字符串的ascii和，因此就直接用了它的字符串，那和肯定是一致的。
+
+正准备过了这个check往下继续，然后......然后就过了，不是，那你最后那个cmp在c啥东西啊？！
+
+![image-20230608110428040](./reverse.assets/image-20230608110428040.png)
+
+狗b vb给爷恶心完了。
+
+![image-20230608110559882](./reverse.assets/image-20230608110559882.png)
+
+```python
+def crackme38():
+    add_num = [0x52, 0x65, 0x76, 0x65, 0x72, 0x73, 0x65]
+    # Reverse
+    for num in add_num:
+        print(chr(num))
+```
+
+
+
+## 039-eKH.1
+
+说实话，这题挺普通的，本来有点懒得写在文档里的。但是啊但是，妈个鸡，看上面的38题就是一肚子气。来vb，睁大你的狗眼看看一页写完input和check的含金量，不会写编译器就别寄吧写啊nmd。
+
+![image-20230608163117082](./reverse.assets/image-20230608163117082.png)
+
+人家就是调了两个函数来做check都他妈看的比你舒服多了。
+
+这题除了常规的分析外有一点感觉比较有意思的，这里把用户名变形后的字符串和输入的序列号一起放进去了，一般来讲就该结束了。
+
+![image-20230608175729722](./reverse.assets/image-20230608175729722.png)
+
+但在主函数里决定成功和失败的cmp里面可以看到，最后call出来的结果是0x12D691这么一个数，比的更是一个0xBC614E，刚开始我以为是还需要把变形字符串和序列号进一步组合。
+
+![image-20230608180203957](./reverse.assets/image-20230608180203957.png)
+
+但是，就在上面截的图里发现这两个数其实出现过，这就不太对劲了，这个硬赋值的行为基本可以视为作者想在cmp处误导我们，这个call实际上就是一个字符串比较的call。
+
+![image-20230608180555116](./reverse.assets/image-20230608180555116.png)
+
+进去一看，确实，一个超级大跳跳到函数结尾，太长就不截了。vb你来看看，人故意恶心人也就跳这么长，你什么寄吧东西。
+
+![image-20230608181015378](./reverse.assets/image-20230608181015378.png)
+
+![image-20230608181149936](./reverse.assets/image-20230608181149936.png)
+
+```python
+def crackme39():
+    name = 'wa1ex'
+    table1 = 'LANNYDIBANDINGINANAKEKHYANGNGENTOT'
+    serial = ''
+    ebx = 0
+    for i in range(0, len(name)):
+        ebx += ord(name[i])
+        ebx *= 256
+        if ebx > 2 ** 32:
+            ebx %= 2 ** 32
+        edx = ord(table1[i])
+        ebx |= edx
+        if ebx >> 31:
+            edx = 0x100000000 - ebx
+            ebx = edx
+    ebx ^= 0x12345678
+    print(hex(ebx))
+    table2 = 'LANNY5646521'
+    while ebx:
+        edx = ebx % 10
+        ebx //= 10
+        serial += table2[edx]
+    print(serial)
+```
+

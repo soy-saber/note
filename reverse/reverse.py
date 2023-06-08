@@ -362,4 +362,36 @@ def crackme37():
     serial = name + name + '625g72'
     print(serial)
 
-crackme37()
+
+def crackme38():
+    add_num = [0x52, 0x65, 0x76, 0x65, 0x72, 0x73, 0x65]
+    # Reverse
+    for num in add_num:
+        print(chr(num))
+
+
+def crackme39():
+    name = 'fatestede'
+    table1 = 'LANNYDIBANDINGINANAKEKHYANGNGENTOT'
+    serial = ''
+    ebx = 0
+    for i in range(0, len(name)):
+        ebx += ord(name[i])
+        ebx *= 256
+        if ebx > 2 ** 32:
+            ebx %= 2 ** 32
+        edx = ord(table1[i])
+        ebx |= edx
+        if ebx >> 31:
+            edx = 0x100000000 - ebx
+            ebx = edx
+    ebx ^= 0x12345678
+    print(hex(ebx))
+    table2 = 'LANNY5646521'
+    while ebx:
+        edx = ebx % 10
+        ebx //= 10
+        serial += table2[edx]
+    print(serial)
+
+crackme39()
