@@ -394,4 +394,23 @@ def crackme39():
         serial += table2[edx]
     print(serial)
 
-crackme39()
+
+def crackme40():
+    name = 'wa1ex'
+    serial = ''
+    for i in name:
+        serial += chr(ord(i) + 5)
+    print(serial)
+
+
+def crackme41():
+    name = 'wa1ex'
+    for i in range(0, 5):
+        if i == 1:
+            continue
+        serial = ord(name[i])
+        serial = serial // 0xA
+        if serial >= 0xA:
+            serial = serial // 0xA
+        print(serial)
+crackme41()

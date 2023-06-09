@@ -1204,3 +1204,75 @@ def crackme39():
     print(serial)
 ```
 
+
+
+## 040-DaNiEl-RJ.1
+
+温和到异常的题目
+
+![image-20230609093538469](./reverse.assets/image-20230609093538469.png)
+
+```python
+def crackme40():
+    name = 'wa1ex'
+    serial = ''
+    for i in name:
+        serial += chr(ord(i) + 5)
+    print(serial)
+```
+
+
+
+## 041-DaNiEl-RJ.1
+
+程序首先要我们拥有一个reg.dat文件，但好像没啥特别的用处，写了字符串进去也不见读。
+
+调了一会没什么进展，主要问题在于虽然字符串搜索是搜到东西了，但是这玩意的函数是单独拎出来的根本进不去，也没啥用。看了眼ede的文档，发现自己忘了这是个delphi程序，可以用之前视频里的工具分析。
+
+过程界面如下所示：Edit有4个，并且都有PROC_00437D1C的调用，那Edit1-4应该就对应调整serial的四个框，PROC_00437D1C就应该是check函数。
+
+![image-20230609101312819](./reverse.assets/image-20230609101312819.png)
+
+![image-20230609101459315](./reverse.assets/image-20230609101459315.png)
+
+嘿，还真是。
+
+![image-20230609101840651](./reverse.assets/image-20230609101840651.png)
+
+这边是在根据窗口编号取值，不知道为啥取值都是分开来写的。
+
+![image-20230609103139402](./reverse.assets/image-20230609103139402.png)
+
+发现好像四个框的数都写到了内存的同一个位置，我以为会写在四个位置保存再做验证。
+
+ ![image-20230609102937585](./reverse.assets/image-20230609102937585.png)
+
+因此在这个位置打了断点，查看后续调用，如下
+
+![image-20230609103610701](./reverse.assets/image-20230609103610701.png)
+
+这段直接F8，两个retn之后到了这里，进437DD3的call，里面就是验证算法。
+
+![image-20230609104921179](./reverse.assets/image-20230609104921179.png)
+
+简而言之，是字符串1、3、4、5位的ascii值除以10的商，这个商如果大于10，那就再来一次。
+
+看了ede的文档回头再来看这道题，应该说我的解法非常繁琐，主要表现在：在定位到了输入框输入的位置后，我直接在内存里打了断点，这会导致一个后果：虽然程序一定会调用这个位置，但我们并不清楚它是如何调用、在哪调用的，没准只是把它挪了个位置，而我们又再次失去了清晰的思路，这只会加大我们理解的难度，应该属于不得已而为之的办法。
+
+对这道题而言，在四个输入框有值改变时，我应该意识到后续会调用同一个check函数来验证serial是否正确，而不是急着去看写入的值在哪些地方被调用，这反而花了我更多的时间去追溯check函数的位置。
+
+![image-20230609122839430](./reverse.assets/image-20230609122839430.png)
+
+```
+def crackme41():
+    name = 'wa1ex'
+    for i in range(0, 5):
+        if i == 1:
+            continue
+        serial = ord(name[i])
+        serial = serial // 0xA
+        if serial >= 0xA:
+            serial = serial // 0xA
+        print(serial)
+```
+
