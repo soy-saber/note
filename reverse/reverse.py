@@ -413,4 +413,49 @@ def crackme41():
         if serial >= 0xA:
             serial = serial // 0xA
         print(serial)
-crackme41()
+
+
+def crackme42():
+    # 75 52 78
+    # 75 83 41
+    serial = '0TbH23456789'
+    # result = 0x2A8BF4
+    # for i in range(0x21, 0x7E):
+    #     for j in range(0x21, 0x7E):
+    #         for k in range(0x21, 0x7E):
+    #             if (i ^ len(serial) ^ 0x54 ^ 0x1e) * (j ^ len(serial) ^ 0xbf ^ 0x4d) * (k ^ len(serial) ^ 0xa2 ^ 0x47)==result:
+    #                 print(chr(i)+chr(j)+chr(k))
+    serial1 = ''
+    for i in serial:
+        serial1 += chr(ord(i) ^ len(serial))
+    serial2 = ''
+    serial2 += chr(ord(serial1[0]) ^ 0x54)
+    serial2 += chr(ord(serial1[1]) ^ 0x4D)
+    serial2 += chr(ord(serial1[2]) ^ 0x47)
+    serial2 = serial2 + serial1[3:]
+    print(serial2)
+
+    esi = edi = 3
+    # 手动订了一个0x20 H
+    # print(chr(0x20 ^ ord(serial2[0])))
+    while esi < len(serial):
+        dl = ord(serial2[0])
+        eax = esi + 1
+        esi += edi
+        serial2 = serial2[0:eax-1] + chr(ord(serial2[eax-1]) ^ dl) + serial2[eax:]
+        dl = ord(serial2[1])
+        serial2 = serial2[0:eax] + chr(ord(serial2[eax]) ^ dl) + serial2[eax+1:]
+        dl = ord(serial2[2])
+        serial2 = serial2[0:eax+1] + chr(ord(serial2[eax+1]) ^ dl) + serial2[eax + 2:]
+    print(hex(ord((serial2[3]))))
+    print(serial2)
+    member_405030 = [0x1e, 0xbf, 0xa2]
+    for i in range(0, len(member_405030)):
+        member_405030[i] ^= ord(serial2[i])
+    total = 1
+    for i in member_405030:
+        total *= i
+    print(hex(total))
+
+
+crackme42()

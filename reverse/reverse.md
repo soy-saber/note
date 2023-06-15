@@ -1261,7 +1261,7 @@ def crackme40():
 
 对这道题而言，在四个输入框有值改变时，我应该意识到后续会调用同一个check函数来验证serial是否正确，而不是急着去看写入的值在哪些地方被调用，这反而花了我更多的时间去追溯check函数的位置。
 
-![image-20230609122839430](./reverse.assets/image-20230609122839430.png)
+![image-20230609122839430](./reverse.assets/image-20230609122839430.png)  
 
 ```
 def crackme41():
@@ -1276,3 +1276,42 @@ def crackme41():
         print(serial)
 ```
 
+
+
+## 042-crackme
+
+直接改这个eax的值，鉴定为寄。
+
+![image-20230609162551845](./reverse.assets/image-20230609162551845.png)
+
+找到函数头4010BE下断点开调，文件内容读到了19F8E9处。
+
+![image-20230609165106085](./reverse.assets/image-20230609165106085.png)
+
+算法部分不长，但全是微调，开始折磨，一点点来吧。
+
+![image-20230609165317494](./reverse.assets/image-20230609165317494.png)
+
+边看算法边写注册机，算法的细节就不在这写了，操作不少不过也大多是常规操作，就是发现这算法尤其钟爱前三个字符，跳转的要求就是变形后前三个字符相乘等于0x2A8BF4
+
+![image-20230613154722934](./reverse.assets/image-20230613154722934.png)
+
+这里我硬来了个三重循环，好消息是把符合条件的开头跑出来了，坏消息是跳转之后程序没了。
+
+```
+### 0Tb 0uC
+result = 0x2A8BF4
+for i in range(0x21, 0x7E):
+    for j in range(0x21, 0x7E):
+        for k in range(0x21, 0x7E):
+            if (i ^ len(serial) ^ 0x54 ^ 0x1e) * (j ^ len(serial) ^ 0xbf ^ 0x4d) * (k ^ len(serial) ^ 0xa2 ^ 0x47)==result:
+                print(chr(i)+chr(j)+chr(k))
+```
+
+![image-20230613155143259](./reverse.assets/image-20230613155143259.png)
+
+而且还有一个问题，下面这段给出了跳出循环的条件，但问题在于我并不知道它什么时候应该跳出来，给了白给。
+
+![image-20230613172240857](./reverse.assets/image-20230613172240857.png)
+
+从跳转之后继续往下看，发现要求变形后的字符有个0x20才能跳出来
