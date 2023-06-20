@@ -481,4 +481,36 @@ def crackme42():
         result[i] ^= serial_len
     for i in result:
         print(hex(i))
-crackme42()
+
+
+def crackme44():
+    print((chr(0x74) + chr(0x73) + chr(0x72) + chr(0x68)))
+    name = 'wa1ex'
+    middle_num = 2003 + len(name)
+    serial = "tsrh-" + str(middle_num) + "-"
+    final_serial = 'tsrh-2008-'
+    unknow1 = 0x68727374 + 0x3220
+    serial_len = len(serial)
+    for i in name:
+        eax = ord(i) + 0xC
+        edx = 2 * eax - 0x11 - serial_len
+        eax ^= edx
+        serial += hex(eax)[2:4]
+        serial_len = len(serial)
+    print(serial)
+    unknow1 ^= 0x403321
+    for i in range(0, len(name)):
+        if i == 0:
+            serial_index = 0xC
+            edx = ord(serial[serial_index])
+        else:
+            edx = 0x0
+        eax = ord(name[i]) + 1
+        eax ^= edx
+        while eax < 0x41:
+            eax += 0x8
+        while eax > 0x5A:
+            eax -= 0x3
+        final_serial += chr(eax)
+    print(final_serial)
+crackme44()

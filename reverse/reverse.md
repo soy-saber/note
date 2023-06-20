@@ -1342,7 +1342,7 @@ for i in range(0x21, 0x7E):
 
 ![image-20230619180151893](./reverse.assets/image-20230619180151893.png)
 
-整理了一下思路，发现是把顺序逆过来的时候有的过程没完全逆过来，逆了但是没完全逆；此外前三个字节与405030处已有的数据进行异或，与405030处的后续字节是无关的，这里写昏头有点混淆了。主要是这题顺着理了太多次思路，一下子转不过来弯了，害死人。
+整理了一下思路，发现是把顺序逆过来的时候有的过程没完全逆过来，逆了但是没完全逆；此外前三个字节与405030处已有的数据进行异或，用户名实际上与405030处的后续字节是无关的，这里写昏头有点混淆了。主要是这题顺着理了太多次思路，一下子转不过来弯了，害死人。
 
 最后补一句，以后写这种读文件类型的题目的时候代码少用字符串，鬼知道它是不是可见字符，md写个文件要用winhex也是没谁了。
 
@@ -1416,5 +1416,73 @@ def crackme42():
         result[i] ^= serial_len
     for i in result:
         print(hex(i))
+```
+
+
+
+## 043-riijj_cm_20041121
+
+双击打得开，PE INFO也很正常。
+
+![image-20230620105501517](./reverse.assets/image-20230620105501517.png)
+
+但是扔进ollydebug里一跑就死，我正纳闷呢，直到看见了下面这个函数。
+
+![image-20230620105642468](./reverse.assets/image-20230620105642468.png)
+
+很眼熟，感谢你ede，下一题。
+
+
+
+## 044-tsrh-crackme
+
+je改jmp，kill this nig！
+
+![image-20230620110637985](./reverse.assets/image-20230620110637985.png)
+
+搜不到字符串，而且发现好多地方都有Invalid serial，并且调试的过程很怪，尝试打断点用来定位的一个函数重复了好多遍，甚至感觉有地方监控鼠标操作（F9到动不了，挪挪鼠标又能F9了）
+
+往下翻了翻程序，发现了从输入框读取的函数。
+
+![image-20230620112219219](./reverse.assets/image-20230620112219219.png)
+
+顺着往下走，要进两个call，第一个的效果是根据用户名进行初始变换和一个字符串的格式化，得到中间字符串；第二个call的效果是将中间字符串的部分字符取出来继续变形（说实话，就取了一个字符，这么大费周章真的离谱），得到serial
+
+乐，在尝试肥逼ede的时候出错了，再次调试的时候发现中间的数字变了，原来中间的数和用户名长度正相关，调试的时候断点下的位置已经在获取中间数字后面了。
+
+![image-20230620152251782](./reverse.assets/image-20230620152251782.png)
+
+```python
+def crackme43():
+    print((chr(0x74) + chr(0x73) + chr(0x72) + chr(0x68)))
+    name = 'wa1ex'
+    middle_num = 2003 + len(name)
+    serial = "tsrh-" + str(middle_num) + "-"
+    final_serial = 'tsrh-2008-'
+    unknow1 = 0x68727374 + 0x3220
+    serial_len = len(serial)
+    for i in name:
+        eax = ord(i) + 0xC
+        edx = 2 * eax - 0x11 - serial_len
+        eax ^= edx
+        serial += hex(eax)[2:4]
+        serial_len = len(serial)
+    print(serial)
+    unknow1 ^= 0x403321
+    for i in range(0, len(name)):
+        if i == 0:
+            serial_index = 0xC
+            edx = ord(serial[serial_index])
+        else:
+            edx = 0x0
+        eax = ord(name[i]) + 1
+        eax ^= edx
+        while eax < 0x41:
+            eax += 0x8
+        while eax > 0x5A:
+            eax -= 0x3
+        final_serial += chr(eax)
+    print(final_serial)
+crackme43()
 ```
 
