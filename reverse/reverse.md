@@ -1310,8 +1310,109 @@ for i in range(0x21, 0x7E):
 
 ![image-20230613155143259](./reverse.assets/image-20230613155143259.png)
 
-而且还有一个问题，下面这段给出了跳出循环的条件，但问题在于我并不知道它什么时候应该跳出来，给了白给。
+而且还有一个问题，下面这段给出了跳出循环的条件，但问题在于我并不知道它到底是什么时候跳出来的（输入里完全没有0xFF相关），给了白给。
 
 ![image-20230613172240857](./reverse.assets/image-20230613172240857.png)
 
 从跳转之后继续往下看，发现要求变形后的字符有个0x20才能跳出来
+
+![image-20230619165329162](./reverse.assets/image-20230619165329162.png)
+
+我把第四个字符构造成0x20继续往下
+
+```
+    # 手动订了一个0x20 D
+    # print(chr(0x20 ^ ord(serial2[0]) ^ len(serial)))
+    # 0TbD23456789
+```
+
+这里把0x20后的东西继续搬到了其他地方。
+
+![image-20230619170048845](./reverse.assets/image-20230619170048845.png)
+
+然后不出预料的在call esi的地方寄掉了。
+
+![image-20230619170312082](./reverse.assets/image-20230619170312082.png)
+
+![image-20230619170551632](./reverse.assets/image-20230619170551632.png)
+
+这个地方如ede文档所言，call esi意味着这段地址应该是一个函数的开头，而函数的开头是固定的558BEC，他们的乘积也是0x2A8BF4。这下子思路就很清晰了，首先构造变形后的558BEC20，然后按ede文档所给信息尝试在0x20后面直接构造个用户名出来。
+
+寄吧，过是过了，但是一坨用户名。
+
+![image-20230619180151893](./reverse.assets/image-20230619180151893.png)
+
+整理了一下思路，发现是把顺序逆过来的时候有的过程没完全逆过来，逆了但是没完全逆；此外前三个字节与405030处已有的数据进行异或，与405030处的后续字节是无关的，这里写昏头有点混淆了。主要是这题顺着理了太多次思路，一下子转不过来弯了，害死人。
+
+![image-20230620103228808](./reverse.assets/image-20230620103228808.png)
+
+```python
+def crackme42():
+    # 75 52 78
+    # 75 83 41
+    # serial = '0TbD23456789'
+    # print(hex(0x55 * 0x8B * 0xEC))
+    # 遍历符合条件的前三个字节
+    # result = 0x2A8BF4
+    # for i in range(0x21, 0x7E):
+    #     for j in range(0x21, 0x7E):
+    #         for k in range(0x21, 0x7E):
+    #             if (i ^ len(serial) ^ 0x54 ^ 0x1e) * (j ^ len(serial) ^ 0xbf ^ 0x4d) * (k ^ len(serial) ^ 0xa2 ^ 0x47)==result:
+    #                 print(chr(i)+chr(j)+chr(k))
+    # 算法变形
+    # serial1 = ''
+    # for i in serial:
+    #     serial1 += chr(ord(i) ^ len(serial))
+    # serial2 = ''
+    # serial2 += chr(ord(serial1[0]) ^ 0x54)
+    # serial2 += chr(ord(serial1[1]) ^ 0x4D)
+    # serial2 += chr(ord(serial1[2]) ^ 0x47)
+    # serial2 = serial2 + serial1[3:]
+    # print(serial2)
+    #
+    # esi = edi = 3
+    # # 手动订了一个0x20 D
+    # # print(chr(0x20 ^ ord(serial2[0]) ^ len(serial)))
+    # # 0TbD23456789
+    # while esi < len(serial):
+    #     dl = ord(serial2[0])
+    #     eax = esi + 1
+    #     esi += edi
+    #     serial2 = serial2[0:eax-1] + chr(ord(serial2[eax-1]) ^ dl) + serial2[eax:]
+    #     dl = ord(serial2[1])
+    #     serial2 = serial2[0:eax] + chr(ord(serial2[eax]) ^ dl) + serial2[eax+1:]
+    #     dl = ord(serial2[2])
+    #     serial2 = serial2[0:eax+1] + chr(ord(serial2[eax+1]) ^ dl) + serial2[eax + 2:]
+    # print(hex(ord((serial2[3]))))
+    # print(serial2)
+    # member_405030 = [0x1e, 0xbf, 0xa2]
+    # for i in range(0, len(member_405030)):
+    #     member_405030[i] ^= ord(serial2[i])
+    # total = 1
+    # for i in member_405030:
+    #     total *= i
+    # print(hex(total))
+
+    serial_len = 9
+    result = [0x55, 0x8B, 0xEC, 0x00, 0x77, 0x61, 0x31, 0x65, 0x78]
+    result[0] = result[0] ^ 0x1E
+    result[1] = result[1] ^ 0xBF
+    result[2] = result[2] ^ 0xA2
+    print(result[0], result[1], result[2])
+    result[3] = result[0] ^ 0x20
+    for i in range(4, serial_len):
+        if i % 3 == 1:
+            result[i] ^= result[1]
+        elif i % 3 == 2:
+            result[i] ^= result[2]
+        else:
+            result[i] ^= result[0]
+    result[0] = result[0] ^ 0x54
+    result[1] = result[1] ^ 0x4D
+    result[2] = result[2] ^ 0x47
+    for i in range(0, serial_len):
+        result[i] ^= serial_len
+    for i in result:
+        print(hex(i))
+```
+

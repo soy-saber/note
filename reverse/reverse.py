@@ -86,7 +86,6 @@ def crackme12():
         bl = ord(name[i])
         al += bl
     temp1 = (al << 3) ^ 0x515A5
-
     # 字符串变整数
     # print(serial)
     # eax = 0xA
@@ -418,44 +417,68 @@ def crackme41():
 def crackme42():
     # 75 52 78
     # 75 83 41
-    serial = '0TbH23456789'
+    # serial = '0TbD23456789'
+    # print(hex(0x55 * 0x8B * 0xEC))
+    # 遍历符合条件的前三个字节
     # result = 0x2A8BF4
     # for i in range(0x21, 0x7E):
     #     for j in range(0x21, 0x7E):
     #         for k in range(0x21, 0x7E):
     #             if (i ^ len(serial) ^ 0x54 ^ 0x1e) * (j ^ len(serial) ^ 0xbf ^ 0x4d) * (k ^ len(serial) ^ 0xa2 ^ 0x47)==result:
     #                 print(chr(i)+chr(j)+chr(k))
-    serial1 = ''
-    for i in serial:
-        serial1 += chr(ord(i) ^ len(serial))
-    serial2 = ''
-    serial2 += chr(ord(serial1[0]) ^ 0x54)
-    serial2 += chr(ord(serial1[1]) ^ 0x4D)
-    serial2 += chr(ord(serial1[2]) ^ 0x47)
-    serial2 = serial2 + serial1[3:]
-    print(serial2)
+    # 算法变形
+    # serial1 = ''
+    # for i in serial:
+    #     serial1 += chr(ord(i) ^ len(serial))
+    # serial2 = ''
+    # serial2 += chr(ord(serial1[0]) ^ 0x54)
+    # serial2 += chr(ord(serial1[1]) ^ 0x4D)
+    # serial2 += chr(ord(serial1[2]) ^ 0x47)
+    # serial2 = serial2 + serial1[3:]
+    # print(serial2)
+    #
+    # esi = edi = 3
+    # # 手动订了一个0x20 D
+    # # print(chr(0x20 ^ ord(serial2[0]) ^ len(serial)))
+    # # 0TbD23456789
+    # while esi < len(serial):
+    #     dl = ord(serial2[0])
+    #     eax = esi + 1
+    #     esi += edi
+    #     serial2 = serial2[0:eax-1] + chr(ord(serial2[eax-1]) ^ dl) + serial2[eax:]
+    #     dl = ord(serial2[1])
+    #     serial2 = serial2[0:eax] + chr(ord(serial2[eax]) ^ dl) + serial2[eax+1:]
+    #     dl = ord(serial2[2])
+    #     serial2 = serial2[0:eax+1] + chr(ord(serial2[eax+1]) ^ dl) + serial2[eax + 2:]
+    # print(hex(ord((serial2[3]))))
+    # print(serial2)
+    # member_405030 = [0x1e, 0xbf, 0xa2]
+    # for i in range(0, len(member_405030)):
+    #     member_405030[i] ^= ord(serial2[i])
+    # total = 1
+    # for i in member_405030:
+    #     total *= i
+    # print(hex(total))
 
-    esi = edi = 3
-    # 手动订了一个0x20 H
-    # print(chr(0x20 ^ ord(serial2[0])))
-    while esi < len(serial):
-        dl = ord(serial2[0])
-        eax = esi + 1
-        esi += edi
-        serial2 = serial2[0:eax-1] + chr(ord(serial2[eax-1]) ^ dl) + serial2[eax:]
-        dl = ord(serial2[1])
-        serial2 = serial2[0:eax] + chr(ord(serial2[eax]) ^ dl) + serial2[eax+1:]
-        dl = ord(serial2[2])
-        serial2 = serial2[0:eax+1] + chr(ord(serial2[eax+1]) ^ dl) + serial2[eax + 2:]
-    print(hex(ord((serial2[3]))))
-    print(serial2)
-    member_405030 = [0x1e, 0xbf, 0xa2]
-    for i in range(0, len(member_405030)):
-        member_405030[i] ^= ord(serial2[i])
-    total = 1
-    for i in member_405030:
-        total *= i
-    print(hex(total))
-
-
+    serial_len = 9
+    result = [0x55, 0x8B, 0xEC, 0x00, 0x77, 0x61, 0x31, 0x65, 0x78]
+    result[0] = result[0] ^ 0x1E
+    result[1] = result[1] ^ 0xBF
+    result[2] = result[2] ^ 0xA2
+    print(result[0], result[1], result[2])
+    result[3] = result[0] ^ 0x20
+    for i in range(4, serial_len):
+        if i % 3 == 1:
+            result[i] ^= result[1]
+        elif i % 3 == 2:
+            result[i] ^= result[2]
+        else:
+            result[i] ^= result[0]
+    result[0] = result[0] ^ 0x54
+    result[1] = result[1] ^ 0x4D
+    result[2] = result[2] ^ 0x47
+    for i in range(0, serial_len):
+        result[i] ^= serial_len
+    for i in result:
+        print(hex(i))
 crackme42()
