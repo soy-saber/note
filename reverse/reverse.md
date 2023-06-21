@@ -1453,7 +1453,7 @@ je改jmp，kill this nig！
 ![image-20230620152251782](./reverse.assets/image-20230620152251782.png)
 
 ```python
-def crackme43():
+def crackme44():
     print((chr(0x74) + chr(0x73) + chr(0x72) + chr(0x68)))
     name = 'wa1ex'
     middle_num = 2003 + len(name)
@@ -1483,6 +1483,202 @@ def crackme43():
             eax -= 0x3
         final_serial += chr(eax)
     print(final_serial)
-crackme43()
+```
+
+
+
+## 045-CyTom-crackme
+
+搜索字符串发现在函数里面，想办法跳出去。
+
+在这里第一次看到输入，那就去41231A看下。
+
+![image-20230620180225990](./reverse.assets/image-20230620180225990.png)
+
+~~可以看到这个cmp基本就应该是我们的目标了，但是还是没找到切入点，试试之前的工具（乐，不支持delphi2程序，拉倒）~~ 哈哈，错误的。
+
+![image-20230620180731364](./reverse.assets/image-20230620180731364.png)
+
+刚刚搜的是失败字符串，搜了下成功的，发现了他妈新大陆。比较离谱的是我想复现一下之前是咋搜出来字符串在函数里的，结果没复现出来，乐了。
+
+![image-20230620181955107](./reverse.assets/image-20230620181955107.png)
+
+1E240 好熟悉的数，想了一下，惊觉是123456的十六进制。太棒了，不用进函数了。
+
+![image-20230621094630039](./reverse.assets/image-20230621094630039.png)
+
+然后进下一个call就结束了。
+
+？
+
+就结束了？这年头竟然还有这么朴实无华、毫不做作的题目？
+
+![image-20230621095521315](./reverse.assets/image-20230621095521315.png)
+
+```python
+def crackme45():
+    name = 'wa1ex'
+    result = 1
+    for i in name:
+        result = (result * ord(i)) & 0xFFFFFFFF
+    result &= 0xFFFFFFF
+    print(result)
+```
+
+
+
+
+
+## 046-keyme1
+
+难得碰到了一个加完壳不需要重建导入表的。
+
+草，沙雕题目。从scanf到cmp就两行，还是硬编码。
+
+![image-20230621101231556](./reverse.assets/image-20230621101231556.png)
+
+![image-20230621101153281](./reverse.assets/image-20230621101153281.png)
+
+
+
+## 047-surre
+
+很抽象的题目，我点try it他要我选一个文件，但我没找到它指定的文件类型。
+
+所以尝试着给了个1.txt，内容为123456。坏消息：我还是不知道它在哪读的，好消息：它还真能读
+
+由于cmp的条件是ebx，特别关注ebx
+
+![image-20230621103235932](./reverse.assets/image-20230621103235932.png)
+
+这一段就实现了个输入数的ascii累加
+
+![image-20230621103340136](./reverse.assets/image-20230621103340136.png)
+
+下一个call的内容很奇怪，因为我在关注ebx的动向，而这个call相当于没动ebx。那我直接构造一个叠加为0x20A9的字符串试试
+
+![image-20230621103646688](./reverse.assets/image-20230621103646688.png)
+
+![image-20230621103722749](./reverse.assets/image-20230621103722749.png)
+
+加完了。
+
+![image-20230621104758023](./reverse.assets/image-20230621104758023.png)
+
+```python
+def crackme47():
+    serial = 'wa1exzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzC'
+    total = 0
+    for i in serial:
+        total += ord(i)
+    print(hex(total))
+    print(chr(0x20A9-0x2066))
+```
+
+
+
+## 048-monkeycrackme1
+
+有两个valid key，点进去一看是在一段里的，在函数头下断点。
+
+![image-20230621105127046](./reverse.assets/image-20230621105127046.png)
+
+中间的call就是变形函数。
+
+![image-20230621110229127](./reverse.assets/image-20230621110229127.png)
+
+这种不好好存读数据的代码是真恶心，byd全从栈上读，malloc不会写是把。
+
+![image-20230621141119110](./reverse.assets/image-20230621141119110.png)
+
+![image-20230621140617743](./reverse.assets/image-20230621140617743.png)
+
+```python
+def crackme48():
+    name = 'wa1ex'
+    arg1 = 0x4DE1
+    serial = ''
+    for i in name:
+        al = ord(i)
+        al ^= (arg1 >> 8)
+        serial += hex(al)[2:4].upper()
+        al += arg1
+        al = (al * 0xCE6D) & 0xFFFF
+        al = (al + 0x58BF) & 0xFFFF
+        arg1 = al
+    print(serial)
+```
+
+
+
+
+
+## 049-THraw-crackme8
+
+没仔细看代码，先猜一个0+ascii
+
+![image-20230621142739212](./reverse.assets/image-20230621142739212.png)
+
+![image-20230621142756949](./reverse.assets/image-20230621142756949.png)
+
+蚌埠住了。
+
+![image-20230621143021519](./reverse.assets/image-20230621143021519.png)
+
+```
+def crackme49():
+    name = 'fatestede'
+    serial = '0'
+    for i in name:
+        serial += hex(ord(i))[2:4]
+    print(serial)
+```
+
+
+
+
+
+## 050-daxxor
+
+令人怀念的Dev-C++
+
+![image-20230621143227398](./reverse.assets/image-20230621143227398.png)
+
+草了，这是什么沙雕东西，可以和48题pk一下逆天程度了。
+
+![image-20230621143409146](./reverse.assets/image-20230621143409146.png)
+
+看的想吐，算法代码有大量重复的这玩意视觉污染，更搞笑的是他把单字符的ascii取出来之后：
+
+1、+8（用户名长度），替换原字符
+
+2、-4
+
+3、-8（用户名长度）
+
+4、-2
+
+5、+2
+
+行，-4。不是，有病是吧，有病就治啊。
+
+![image-20230621152714521](./reverse.assets/image-20230621152714521.png)
+
+底下更是重量级，3个字符后加个-，5个字符后再加个-，6个字符后加axd的效果，能写成这种样子。
+
+![image-20230621154100538](./reverse.assets/image-20230621154100538.png)
+
+评价为堪称vb。
+
+![image-20230621154607806](./reverse.assets/image-20230621154607806.png)
+
+```python
+def crackme50():
+    name = 'wwwwwa1ex'
+    serial = ''
+    for i in name:
+        serial += chr(ord(i)-4)
+    serial = serial[0:3] + '-' + serial[3] + '-axd' + serial[4:]
+    print(serial)
 ```
 

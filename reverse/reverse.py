@@ -513,4 +513,59 @@ def crackme44():
             eax -= 0x3
         final_serial += chr(eax)
     print(final_serial)
-crackme44()
+
+
+def crackme45():
+    name = 'wa1ex'
+    result = 1
+    for i in name:
+        result = (result * ord(i)) & 0xFFFFFFFF
+    result &= 0xFFFFFFF
+    print(result)
+
+
+def crackme46():
+    serial = '0x01CE8E1A'
+    print(eval(serial))
+
+
+def crackme47():
+    serial = 'wa1exzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzC'
+    total = 0
+    for i in serial:
+        total += ord(i)
+    print(hex(total))
+    print(chr(0x20A9-0x2066))
+
+
+def crackme48():
+    name = 'wa1ex'
+    arg1 = 0x4DE1
+    serial = ''
+    for i in name:
+        al = ord(i)
+        al ^= (arg1 >> 8)
+        serial += hex(al)[2:4].upper()
+        al += arg1
+        al = (al * 0xCE6D) & 0xFFFF
+        al = (al + 0x58BF) & 0xFFFF
+        arg1 = al
+    print(serial)
+
+
+def crackme49():
+    name = 'wa1ex'
+    serial = '0'
+    for i in name:
+        serial += hex(ord(i))[2:4]
+    print(serial)
+
+
+def crackme50():
+    name = 'wwwwwa1ex'
+    serial = ''
+    for i in name:
+        serial += chr(ord(i)-4)
+    serial = serial[0:3] + '-' + serial[3] + '-axd' + serial[4:]
+    print(serial)
+crackme50()
