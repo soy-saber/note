@@ -1527,8 +1527,6 @@ def crackme45():
 
 
 
-
-
 ## 046-keyme1
 
 难得碰到了一个加完壳不需要重建导入表的。
@@ -1611,8 +1609,6 @@ def crackme48():
 
 
 
-
-
 ## 049-THraw-crackme8
 
 没仔细看代码，先猜一个0+ascii
@@ -1633,8 +1629,6 @@ def crackme49():
         serial += hex(ord(i))[2:4]
     print(serial)
 ```
-
-
 
 
 
@@ -1682,3 +1676,100 @@ def crackme50():
     print(serial)
 ```
 
+
+
+## 051-Keygenning4newbies
+
+显然，得：
+
+![image-20230625095324139](./reverse.assets/image-20230625095324139.png)
+
+```python
+def crackme51():
+    name = 'wa1ex'
+    ecx = 0
+    serial = 0
+    eax = 0
+    for i in name:
+        ecx += 1
+        eax = ord(i) ^ ecx
+        serial += eax
+    eax *= 0x6
+    serial <<= 0x7
+    eax += serial
+    print(hex(eax).upper()[2:])
+```
+
+
+
+## 052-tc.2
+
+上来需要导入一个文件，需要文件内容为Runtime Error: 12FF:024，check部分如下图。但令人悲伤的是，我一开始以为这地方是个什么我不知道的运行报错，完全没想到这玩意就是导入文件需要的内容，导致我白白定位了半天，还是看了ede的文档才尝试了一下。
+
+![image-20230625101818264](./reverse.assets/image-20230625101818264.png)
+
+尝试跟了一下流程，有点长到令人发指的感觉，中间调用了很多次用户名不说，还有非常非常多看不出来作用的call，每个都跟进去怕是要死人。不过先试一下吧。
+
+![image-20230625104344113](./reverse.assets/image-20230625104344113.png)
+
+变形个寂寞，实际上是用来记录每个字符的位置，我直接问号。
+
+![image-20230625110032089](./reverse.assets/image-20230625110032089.png)
+
+![image-20230625110101271](./reverse.assets/image-20230625110101271.png)
+
+这里拼了个字符串出来
+
+![image-20230625111239760](./reverse.assets/image-20230625111239760.png)
+
+![image-20230625111225548](./reverse.assets/image-20230625111225548.png)
+
+真正的变形部分
+
+![image-20230625141006145](./reverse.assets/image-20230625141006145.png)
+
+细看一下变形部分，有个地方很搞笑。框的这两个地方是栈的同一个位置，但编译器用两种方式解释了。
+
+![image-20230625142803056](./reverse.assets/image-20230625142803056.png)
+
+尾声
+
+![image-20230625141034201](./reverse.assets/image-20230625141034201.png)
+
+评价：算法很简单，但是程序写的和屎一样，不是vb胜似vb。首先，上一个变量还在local5，下一个就敢在local267，强行要求破解者要lock stack之后不停的跟才能了解发生了什么；其次，函数中有大量的无效部分，不管是记录字符位置还是拼接字符串，和真正的变形部分没有丝毫关系，而破解者因为上一条的原因还不敢一路F8；连编译器都没认出来用的是同一个变量，很难想象作者在调用的时候是用了什么恶心人的方式来调用的，纯恶心人。
+
+![image-20230625143206002](./reverse.assets/image-20230625143206002.png)
+
+```python
+def crackme52():
+    name = 'wa1ex'
+    total = 0
+    bl = 0
+    ebp_014 = 1
+    for i in name:
+        if bl < ord(i):
+            bl = 0x100 + bl - ord(i)
+        else:
+            bl -= ord(i)
+        bl += ebp_014
+        total += bl
+        ebp_014 += 1
+        print(hex(total))
+    if total < 0x438D:
+        total += 0x45E6
+    print(str(total)[0:2] + '-' + str(total)[2:3] + '-' + str(total)[3:])
+```
+
+
+
+
+
+## 053-devilz KeyGen me#3
+
+很嚣张的题目，上来就要求我自杀。妈的，爆了！
+
+![image-20230625144001835](./reverse.assets/image-20230625144001835.png)
+
+但是好像用没见过的方式加了壳，这下似定了。
+
+![image-20230625144643677](./reverse.assets/image-20230625144643677.png)

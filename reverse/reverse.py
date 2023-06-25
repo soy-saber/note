@@ -568,4 +568,39 @@ def crackme50():
         serial += chr(ord(i)-4)
     serial = serial[0:3] + '-' + serial[3] + '-axd' + serial[4:]
     print(serial)
-crackme50()
+
+
+def crackme51():
+    name = 'wa1ex'
+    ecx = 0
+    serial = 0
+    eax = 0
+    for i in name:
+        ecx += 1
+        eax = ord(i) ^ ecx
+        serial += eax
+    eax *= 0x6
+    serial <<= 0x7
+    eax += serial
+    print(hex(eax).upper()[2:])
+
+
+def crackme52():
+    name = 'wa1ex'
+    total = 0
+    bl = 0
+    ebp_014 = 1
+    for i in name:
+        if bl < ord(i):
+            bl = 0x100 + bl - ord(i)
+        else:
+            bl -= ord(i)
+        bl += ebp_014
+        total += bl
+        ebp_014 += 1
+        print(hex(total))
+    if total < 0x438D:
+        total += 0x45E6
+    print(str(total)[0:2] + '-' + str(total)[2:3] + '-' + str(total)[3:])
+crackme52()
+
