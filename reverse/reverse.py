@@ -602,5 +602,119 @@ def crackme52():
     if total < 0x438D:
         total += 0x45E6
     print(str(total)[0:2] + '-' + str(total)[2:3] + '-' + str(total)[3:])
-crackme52()
 
+
+def crackme53():
+    name = 'wa1ex'
+    name_new1 = ''
+    for i in range(0, 5):
+        name_new1 += name[4-i]
+    name_new2 = ''
+    for i in range(0, 5):
+        name_new2 += chr(ord(name_new1[i]) ^ 0x30 ^ 0x20)
+    print(name_new2)
+
+
+def crackme54():
+    name = 'w-a1ex'
+    ebp = 0
+    for i in name:
+        ebp += ord(i)
+    ebp += 0x6064
+    sebp = str(ebp)
+    ebp += 0x6064
+    temp = name[0:2] + name[-1].upper() + sebp + '-' + str(ebp)
+    print(temp)
+
+
+def crackme55():
+    # return zero
+    return
+
+
+def crackme56():
+    name = 'wa1ex'
+    serial_list = []
+    serial = ''
+    al = 0x5
+    for i in name:
+        cl = (ord(i) ^ 0x29) + al
+        if (cl > 0x5A) | (cl < 0x41):
+            cl = 0x52 + al
+            serial_list.append(hex(cl))
+        else:
+            serial_list.append(hex(cl))
+        al -= 1
+    al = 0x5
+    for i in name:
+        cl = (ord(i) ^ 0x27) + al + 0x1
+        if (cl > 0x5A) | (cl < 0x41):
+            cl = 0x4D + al
+            serial_list.append(hex(cl))
+        else:
+            serial_list.append(hex(cl))
+        al -= 1
+    for i in serial_list:
+        serial += chr(eval(i))
+    print(serial)
+    cl = 0
+    serial1 = ''
+    for i in serial:
+        dl = ord(i) + 5
+        if dl > 0x5A:
+            dl -= 0xD
+        dl ^= 0xC
+        if dl < 0x41:
+            dl = 0x4B + cl
+        if dl > 0x5A:
+            dl = 0x4B - cl
+        cl += 1
+        serial1 += chr(dl)
+    print(serial1)
+
+
+def crackme58():
+    # name = 'wa1ex'
+    # str1 = 'crackme'
+    # str2 = '657uthutduehdhdhd,ljhgs4sgf4s5s5gs5sg5g45s4g5dgyshste][gf]fg]f]d]'
+    # temp = []
+    # for i in range(0, len(name)):
+    #     edx = ord(str1[i])
+    #     ecx = ord(str2[i])
+    #     cal = ecx & edx
+    #     cal &= ord(str1[i])
+    #     cal ^= ord(str2[i])
+    #     cal += i
+    #     temp.append(hex(cal))
+    # temp.append(hex(len(name)))
+    # serial = '0x'
+    # for i in temp:
+    #     serial += i[2:]
+    print(0x423820)
+
+
+def crackme59():
+    name = 'ewa1ex'
+    dict_alp = {'a': 0x18, 'e': 0xD, 'w': 0x58, 'x': 0xA}
+    total = 0x5D
+    for i in range(0, 5):
+        if dict_alp.get(name[i]):
+            value = dict_alp.get(name[i])
+        else:
+            value = 0x5D
+        total += value
+        if total >= 0x100:
+            total -= 0x100
+    print(str(total) + '-' + str(6 * 0x4A7E))
+
+
+def crackme60():
+    name = 'wa1ex'
+    addNum = 0
+    for i in name:
+        addNum += ord(i)
+        if addNum >= 0x100:
+            addNum -= 0x100
+    
+    print(addNum)
+crackme60()

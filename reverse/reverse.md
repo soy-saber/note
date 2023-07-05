@@ -1773,3 +1773,250 @@ def crackme52():
 但是好像用没见过的方式加了壳，这下似定了。
 
 ![image-20230625144643677](./reverse.assets/image-20230625144643677.png)
+
+打开程序发现有pushad，找popad下断点，但是没断着。
+
+![image-20230627105809794](./reverse.assets/image-20230627105809794.png)
+
+看视频使用esp定律在401000处脱壳，现在可以搜索到字符串了。算法很简单。
+
+![image-20230627112904721](./reverse.assets/image-20230627112904721.png)
+
+```python
+def crackme53():
+    name = 'wa1ex'
+    name_new1 = ''
+    for i in range(0, 5):
+        name_new1 += name[4-i]
+    name_new2 = ''
+    for i in range(0, 5):
+        name_new2 += chr(ord(name_new1[i]) ^ 0x30 ^ 0x20)
+    print(name_new2)
+```
+
+
+
+
+
+## 054-vcrkme01
+
+跳到开头变形。
+
+![image-20230627134254397](./reverse.assets/image-20230627134254397.png)
+
+说起来刚开始以为是个硬编码，试了两下发现还不是。
+
+第二个字符为-
+
+![image-20230627135801381](./reverse.assets/image-20230627135801381.png)
+
+有个挺有意思的写法：下面的ecx的值实际上为字符串的长度，就是把这玩意放在循环里有点多此一举的意思。
+
+![image-20230627140512379](./reverse.assets/image-20230627140512379.png)
+
+代码很长，但是有很多冗余信息，好在看着没有vb和前面有些题那么反人类
+
+![image-20230627142529629](./reverse.assets/image-20230627142529629.png)
+
+```python
+def crackme54():
+    name = 'f-atestede'
+    ebp = 0
+    for i in name:
+        ebp += ord(i)
+    ebp += 0x6064
+    sebp = str(ebp)
+    ebp += 0x6064
+    temp = name[0:2] + name[-1].upper() + sebp + '-' + str(ebp)
+    print(temp)
+```
+
+
+
+## 055-BCG Crackme
+
+一点开来阵仗还不小，有点意思。ESP脱壳。
+
+文件名。
+
+![image-20230627143903603](./reverse.assets/image-20230627143903603.png)
+
+分两次读了10个字符
+
+![image-20230627145917900](./reverse.assets/image-20230627145917900.png)
+
+要求字符串1异或0x58后等于字符串2，看起来是很简单事，但是问题在于4020F3和4020FD这个尴尬的位置。没错，正常写入20个字符将导致字符串1的长度为20，字符串2的长度为10，等于是不可能等于的，这辈子都等于不了了。
+
+![image-20230627145934145](./reverse.assets/image-20230627145934145.png)
+
+根据读取逻辑和判断逻辑，因此把前10个字符设成0x58，后10个字符设成0x0即可，具体条件为：
+
+1、要断开两个字符串，因此第11个字符必为0，也就是说第1个字符必为0x58
+
+2、由于在异或过程中会与0x0进行cmp，因此0x0不能出现在前10个字符中。
+
+3、满足前两个条件后，对应字符异或对应值为0x58即可。
+
+![image-20230627151118095](./reverse.assets/image-20230627151118095.png)
+
+![image-20230627151230787](./reverse.assets/image-20230627151230787.png)
+
+令人唏嘘，这个web已经打不开咯。
+
+
+
+## 056-diablo2oo2's Crackme 01
+
+不难，很烦，真的很烦。
+
+![image-20230627155507031](./reverse.assets/image-20230627155507031.png)
+
+```python
+def crackme56():
+    name = 'wa1ex'
+    serial_list = []
+    serial = ''
+    al = 0x5
+    for i in name:
+        cl = (ord(i) ^ 0x29) + al
+        if (cl > 0x5A) | (cl < 0x41):
+            cl = 0x52 + al
+            serial_list.append(hex(cl))
+        else:
+            serial_list.append(hex(cl))
+        al -= 1
+    al = 0x5
+    for i in name:
+        cl = (ord(i) ^ 0x27) + al + 0x1
+        if (cl > 0x5A) | (cl < 0x41):
+            cl = 0x4D + al
+            serial_list.append(hex(cl))
+        else:
+            serial_list.append(hex(cl))
+        al -= 1
+    for i in serial_list:
+        serial += chr(eval(i))
+    print(serial)
+    cl = 0
+    serial1 = ''
+    for i in serial:
+        dl = ord(i) + 5
+        if dl > 0x5A:
+            dl -= 0xD
+        dl ^= 0xC
+        if dl < 0x41:
+            dl = 0x4B + cl
+        if dl > 0x5A:
+            dl = 0x4B - cl
+        cl += 1
+        serial1 += chr(dl)
+    print(serial1)
+```
+
+
+
+## 057-bbbs-crackme04
+
+我超，这次是真的反调试？哦，不是。
+
+视频片段里的代码和我的好像对不上？怪事。b站也有类似评论，暂时搁置。
+
+![image-20230629180521017](./reverse.assets/image-20230629180521017.png)
+
+
+
+## 058-CZG-crackme1
+
+没找到可用的字符串我靠。
+
+尝试直接从头F8，还行不是很远。上面的call有输入，下面的call直接没了，猜测输入和算法都在上面的call里。
+
+![image-20230629181516757](./reverse.assets/image-20230629181516757.png)
+
+寄，完全没找到算法就寄了。
+
+看了眼视频，完全没注意到这两个东西，但尝试了一下仍然没有思路。
+
+![image-20230629182440513](./reverse.assets/image-20230629182440513.png)
+
+再看一眼视频，原来定位的关键是算法字符串，行吧。
+
+真是有被这下头题目恶心到，算法巴拉巴拉调半天，卡在这个位置，实在是想不通格式化是咋把用户名格过来的。
+
+![image-20230703152404942](./reverse.assets/image-20230703152404942.png)
+
+![image-20230703152617396](./reverse.assets/image-20230703152617396.png)
+
+![image-20230703152650495](./reverse.assets/image-20230703152650495.png)
+
+看了眼视频，nm原来和地址内存的数据无关，只和地址本身有关。
+
+![image-20230703152903679](./reverse.assets/image-20230703152903679.png)
+
+```python
+def crackme58():
+    # name = 'wa1ex'
+    # str1 = 'crackme'
+    # str2 = '657uthutduehdhdhd,ljhgs4sgf4s5s5gs5sg5g45s4g5dgyshste][gf]fg]f]d]'
+    # temp = []
+    # for i in range(0, len(name)):
+    #     edx = ord(str1[i])
+    #     ecx = ord(str2[i])
+    #     cal = ecx & edx
+    #     cal &= ord(str1[i])
+    #     cal ^= ord(str2[i])
+    #     cal += i
+    #     temp.append(hex(cal))
+    # temp.append(hex(len(name)))
+    # serial = '0x'
+    # for i in temp:
+    #     serial += i[2:]
+    print(0x423820)
+```
+
+
+
+## 059-Dope2112.1
+
+普通。
+
+![image-20230705154549811](./reverse.assets/image-20230705154549811.png)
+
+```python
+def crackme59():
+    name = 'wwa1ex'
+    dict_alp = {'a': 0x18, 'e': 0xD, 'w': 0x58, 'x': 0xA}
+    total = 0x5D
+    for i in range(0, 5):
+        if dict_alp.get(name[i]):
+            value = dict_alp.get(name[i])
+        else:
+            value = 0x5D
+        total += value
+        if total >= 0x100:
+            total -= 0x100
+    print(str(total) + '-' + str(6 * 0x4A7E))
+```
+
+
+
+## 060-snake
+
+算法部分被集中在了3个call里面。
+
+![image-20230705155047998](./reverse.assets/image-20230705155047998.png)
+
+第一个call看不懂，往很偏的地方塞了很多FF。
+
+![image-20230705155303954](./reverse.assets/image-20230705155303954.png)
+
+第二个call往一段00里异或了很多CC，这下算是知道这题目为什么叫snake了，99是当前位置，DD猜测是目标位置。
+
+![image-20230705160437093](./reverse.assets/image-20230705160437093.png)
+
+根据第三个call，1往上，2往左，3往右，那剩个0就得是向下了。![1AD56A22](./reverse.assets/1AD56A22.png)的位置在99，先尝试挪到DD看看效果。22222000，发现没有成功。原因是它cmp了401F04处的一个数，观察上下文可以看到这个数会在CC触发的时候dec，也就是说要先把CC吃完，最后吃DD。
+
+![image-20230705164133366](./reverse.assets/image-20230705164133366.png)
+
+（突然感觉这注册机有种任重而道远的感觉。
+
