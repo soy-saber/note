@@ -769,4 +769,24 @@ def crackme60():
         else:
             serial += '0' * (-row_distance)
     print(serial)
-crackme60()
+
+
+def crackme61():
+    name = 'wa1ex'
+    name = name + (16 - len(name)) * '1'
+    ebx = 0
+    for i in name:
+        eax = ord(i)
+        eax += 0xF
+        eax ^= 0x20
+        ebx += eax
+        print(hex(ebx))
+    ebx = ebx * 0x7A69
+    print(name + hex(ebx)[2:].upper())
+
+
+def crackme62():
+    name = 'wa1ex'
+    serial = ' ' + name[1:]
+    print(serial)
+crackme62()

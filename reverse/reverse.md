@@ -2098,6 +2098,61 @@ def crackme60():
 
 
 
-## 061-snake
+## 061-TDC-keyfileme
+
+一开始有个问题是不知道密钥文件的文件名是什么，但是翻memory address的时候看到了keyfile.dat，试了一下确实是，不管了。
 
 ![image-20230706171614200](./reverse.assets/image-20230706171614200.png)
+
+根据hint得知前16位为name，后16位为serial。然后这个40113E的位置就该是算法call。
+
+![image-20230707104838593](./reverse.assets/image-20230707104838593.png)
+
+用00作为文件长度的填充，也作为字符串读取的终止符，使serial匹配。
+
+![image-20230707145827870](./reverse.assets/image-20230707145827870.png)
+
+```python
+def crackme61():
+    name = 'wa1ex'
+    name = name + (16 - len(name)) * '1'
+    ebx = 0
+    for i in name:
+        eax = ord(i)
+        eax += 0xF
+        eax ^= 0x20
+        ebx += eax
+        print(hex(ebx))
+    ebx = ebx * 0x7A69
+    print(name + hex(ebx)[2:].upper())
+```
+
+
+
+## 062-syllogism-crackme1
+
+要求用户名和这个字符串完全一致？？好像没有这么单纯。
+
+![image-20230707151918449](./reverse.assets/image-20230707151918449.png)
+
+![image-20230707151926248](./reverse.assets/image-20230707151926248.png)
+
+这题的代码突出一个怪，de起来及其的不顺手，但又不是像vb一样的一眼屎，很怪。追记：太傻比了，作者加的屎。
+
+在这两个call里面把用户名的第一个字符变成了空格，然后和serial进行比较。
+
+![image-20230707165521860](./reverse.assets/image-20230707165521860.png)
+
+如果完全一致，就会给bl赋个1。
+
+![image-20230707165635654](./reverse.assets/image-20230707165635654.png)
+
+那么问题来了，后面这一大段+特定字符串有什么用呢？
+
+![image-20230707165812655](./reverse.assets/image-20230707165812655.png)
+
+事实上p用没有的同时，还让我绕了20min弯路。就像我在这题开头所说的，我第一时间以为这个字符串会对验证过程有很大影响，甚至说需要输入的用户名和该字符串完全一致。但就在这个地方作者打了个反思路，如果输入的字符串和该字符串完全一致，那么验证将不通过。没错，你输入的所有用户名、序列号都能通过这个call，**除了**这个字符串。诶好死不死我还正好就输了这个字符串，嗨呀我是真的rlnmd。
+
+最后精心保存下来的bl赋值给了al，让test eax eax在jmz处不跳转，然后就过了。
+
+![image-20230707180327593](./reverse.assets/image-20230707180327593.png)
