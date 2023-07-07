@@ -709,12 +709,64 @@ def crackme59():
 
 
 def crackme60():
+    import numpy as np
+    np.set_printoptions(linewidth=np.inf)
+    area = np.zeros((16, 16)).astype(int)
     name = 'wa1ex'
-    addNum = 0
+    PointRecord = np.zeros((2, len(name) + 2)).astype(int)
+    serial = ''
+    dl = 0
     for i in name:
-        addNum += ord(i)
-        if addNum >= 0x100:
-            addNum -= 0x100
-    
-    print(addNum)
+        dl += ord(i)
+        if dl >= 0x100:
+            dl -= 0x100
+    for i in range(0, len(name)):
+        al = ord(name[i])
+        al ^= dl
+        dl -= al
+        if dl < 0:
+            dl += 0x100
+        area[al // 16][al % 16] ^= 0xCC
+        PointRecord[0][i+1] = (al // 16)
+        PointRecord[1][i+1] = (al % 16)
+        if not area[al // 16][al % 16]:
+            dl -= 1
+            dl -= al
+            if dl < 0:
+                dl += 0x100
+            area[al // 16][al % 16] ^= 0xCC
+            PointRecord[0][i] = (al // 16)
+            PointRecord[1][i] = (al % 16)
+    dl ^= al
+    while True:
+        al -= dl
+        if al < 0:
+            al += 0x100
+        if area[al // 16][al % 16] != 0xCC:
+            break
+        dl -= 1
+    area[al // 16][al % 16] = 0xDD
+    PointRecord[0][len(name) + 1] = (al // 16)
+    PointRecord[1][len(name) + 1] = (al % 16)
+    al = dl
+    while True:
+        if (area[al // 16][al % 16] != 0xCC) and (area[al // 16][al % 16] != 0xDD):
+            area[al // 16][al % 16] = 0x99
+            break
+        else:
+            al -= 1
+    PointRecord[0][0] = (al // 16)
+    PointRecord[1][0] = (al % 16)
+    for i in range(0, len(name) + 1):
+        line_distance = PointRecord[1][i] - PointRecord[1][i+1]
+        row_distance = PointRecord[0][i] - PointRecord[0][i+1]
+        if line_distance > 0:
+            serial += '2' * line_distance
+        else:
+            serial += '3' * (-line_distance)
+        if row_distance > 0:
+            serial += '1' * row_distance
+        else:
+            serial += '0' * (-row_distance)
+    print(serial)
 crackme60()

@@ -2014,9 +2014,90 @@ def crackme59():
 
 ![image-20230705160437093](./reverse.assets/image-20230705160437093.png)
 
-根据第三个call，1往上，2往左，3往右，那剩个0就得是向下了。![1AD56A22](./reverse.assets/1AD56A22.png)的位置在99，先尝试挪到DD看看效果。22222000，发现没有成功。原因是它cmp了401F04处的一个数，观察上下文可以看到这个数会在CC触发的时候dec，也就是说要先把CC吃完，最后吃DD。
+根据第三个call，1往上，2往左，3往右，那剩个0就得是向下了。![1AD56A22](./reverse.assets/1AD56A22.png)的位置在99，先尝试挪到DD看看效果。22222000，发现没有成功。原因是进到DD的check流程时，它cmp了401F04处的一个数，观察上下文可以看到这个数会在CC触发的时候dec，也就是说要先把CC吃完，最后吃DD。
 
 ![image-20230705164133366](./reverse.assets/image-20230705164133366.png)
 
 （突然感觉这注册机有种任重而道远的感觉。
 
+实现上，我把每次出现的CC点按序存入二维数组，该数组的头尾分别由99点和DD点构成。虽然有考虑过要不要搞得最短距离的实现，但是犯懒就算了。
+
+![image-20230706165833928](./reverse.assets/image-20230706165833928.png)
+
+没想到这注册机连肥逼ede都过了，还行。（吊，写成最快的ede了
+
+![image-20230706170229087](./reverse.assets/image-20230706170229087.png)
+
+最后观察了一下程序运行，还好这玩意没有碰撞体积，不然头更大了。
+
+![image-20230706170621279](./reverse.assets/image-20230706170621279.png)
+
+```python
+def crackme60():
+    import numpy as np
+    np.set_printoptions(linewidth=np.inf)
+    area = np.zeros((16, 16)).astype(int)
+    name = 'wa1ex'
+    PointRecord = np.zeros((2, len(name) + 2)).astype(int)
+    serial = ''
+    dl = 0
+    for i in name:
+        dl += ord(i)
+        if dl >= 0x100:
+            dl -= 0x100
+    for i in range(0, len(name)):
+        al = ord(name[i])
+        al ^= dl
+        dl -= al
+        if dl < 0:
+            dl += 0x100
+        area[al // 16][al % 16] ^= 0xCC
+        PointRecord[0][i+1] = (al // 16)
+        PointRecord[1][i+1] = (al % 16)
+        if not area[al // 16][al % 16]:
+            dl -= 1
+            dl -= al
+            if dl < 0:
+                dl += 0x100
+            area[al // 16][al % 16] ^= 0xCC
+            PointRecord[0][i] = (al // 16)
+            PointRecord[1][i] = (al % 16)
+    dl ^= al
+    while True:
+        al -= dl
+        if al < 0:
+            al += 0x100
+        if area[al // 16][al % 16] != 0xCC:
+            break
+        dl -= 1
+    area[al // 16][al % 16] = 0xDD
+    PointRecord[0][len(name) + 1] = (al // 16)
+    PointRecord[1][len(name) + 1] = (al % 16)
+    al = dl
+    while True:
+        if (area[al // 16][al % 16] != 0xCC) and (area[al // 16][al % 16] != 0xDD):
+            area[al // 16][al % 16] = 0x99
+            break
+        else:
+            al -= 1
+    PointRecord[0][0] = (al // 16)
+    PointRecord[1][0] = (al % 16)
+    for i in range(0, len(name) + 1):
+        line_distance = PointRecord[1][i] - PointRecord[1][i+1]
+        row_distance = PointRecord[0][i] - PointRecord[0][i+1]
+        if line_distance > 0:
+            serial += '2' * line_distance
+        else:
+            serial += '3' * (-line_distance)
+        if row_distance > 0:
+            serial += '1' * row_distance
+        else:
+            serial += '0' * (-row_distance)
+    print(serial)
+```
+
+
+
+## 061-snake
+
+![image-20230706171614200](./reverse.assets/image-20230706171614200.png)
