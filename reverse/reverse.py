@@ -789,4 +789,150 @@ def crackme62():
     name = 'wa1ex'
     serial = ' ' + name[1:]
     print(serial)
-crackme62()
+
+
+def crackme63():
+    name = 'wa1ex'
+    hard_str1 = ';;;;;;;;;;;;;**====,,=,,========*=**=*=**=*=**=*=*=* '
+    hard_str2 = ''
+    for i in hard_str1:
+        hard_str2 += chr(ord(i)+1)
+    local4 = len(hard_str2) + 2
+    hardcode_name = []
+    for i in hard_str2:
+        hardcode_name.append(ord(i))
+    hardcode_name.append(0)
+    for i in name:
+        hardcode_name.append(ord(i))
+    hardcode_name.append(0)
+
+    for i in range(0, 100):
+        ecx = hardcode_name[i]
+        if ecx > 0x3C:
+            if ecx == 0x3e:
+                local4 += 1
+            elif ecx == 0x5B:
+                ecx = local4
+                if hardcode_name[ecx-1]:
+                    continue
+                else:
+                    i += 1
+                    while True:
+                        if hardcode_name[i] == 0x5D:
+                            break
+                        else:
+                            i += 1
+                            continue
+            elif ecx == 0x5D:
+                ecx = local4
+                if hardcode_name[ecx-1]:
+                    continue
+                else:
+                    i -= 1
+                    while True:
+                        if hardcode_name[i] == 0x5D:
+                            break
+                        else:
+                            i -= 1
+                            continue
+        elif ecx == 0x3c:
+            local4 -= 1
+        elif ecx == 0x21:
+            break
+        elif ecx == 0x2B:
+            ecx = local4
+            hardcode_name[ecx-1] += 1
+        elif ecx == 0x2D:
+            ecx = local4
+            hardcode_name[ecx-1] -= 1
+    edi = 0x19f568
+    for i in range(1, 10):
+        eax = len(hard_str2) + i
+        try:
+            eax = hardcode_name[eax-1]
+        except IndexError as e:
+            continue
+        edi += eax
+    print(edi)
+
+
+def crackme66():
+    hard_str = 'kXy^rO|*yXo*m\kMuOn*+'
+    serial = ''
+    for i in hard_str:
+        serial += chr(ord(i)-10)
+    print(serial)
+    # aNoThEr oNe cRaCkEd !
+
+
+def crackme68():
+    hard_str = '203945709398475029384750293875577934765620110289347563929867122287863095762304984875020398746563'
+    name = 'wwa1ex'
+    serial = ''
+    for i in name:
+        edx = ord(i) - 0x20
+        serial += hard_str[edx]
+    print(serial)
+
+
+def crackme69():
+    name = 'wa1ex'
+    serial = ''
+    for i in name:
+        esi = ord(i)
+        ecx = 0x6
+        eax = esi//ecx
+        edx = esi
+        edx >>= 0x2
+        eax *= edx
+        temp = eax
+
+        ecx = 0xA
+        edx = esi//ecx
+        eax = temp
+        result = eax//edx
+        serial += str(result)
+    print('ADCM4-' + serial + '-YEAH!')
+
+
+def crackme71():
+    name = 'wa1ex1'
+    hardcode = '31415926535897932384'
+    serial = ''
+    eax = 0
+    for i in range(0, len(name)):
+        al = ord(name[i])
+        ebp = ord(hardcode[i])
+        edx = al % ebp
+        eax = edx * 2
+        if eax > 0x7B:
+            eax -= 0x1A
+        if eax < 0x41:
+            edx = 0x82
+            edx -= eax
+            eax = edx
+        if (eax > 0x5B) and (eax < 0x61):
+            eax = eax % 10 + 0x30
+        serial += chr(eax)
+    print(serial)
+
+
+def crackme72():
+    name = 'wwwwwa1ex'
+    # 假
+    pos_4038FC = len(name)
+    serial = ''
+    for i in range(0, len(name) + 1):
+        ecx = (pos_4038FC * (i+1) + 0x17) ^ 0xF
+        eax = ecx
+        serial += str(eax)
+    print(serial)
+
+    ax = 0x6177 ^ 0xE32F
+    ax = (ax * ax) & 0xFFFF
+    ax ^= 0xAB6C
+    print(hex(ax))
+
+
+
+crackme72()

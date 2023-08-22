@@ -2156,3 +2156,283 @@ def crackme61():
 最后精心保存下来的bl赋值给了al，让test eax eax在jmz处不跳转，然后就过了。
 
 ![image-20230707180327593](./reverse.assets/image-20230707180327593.png)
+
+
+
+## 063-dc0de-crackme
+
+一种植物，63之前写的没保存下来，淦，正好从头来一遍吧，这次记得不要写字符串了。
+
+评价还是为：不难，很烦。
+
+![image-20230804144300996](./reverse.assets/image-20230804144300996.png)
+
+```python
+def crackme63():
+    name = 'wa1ex'
+    hard_str1 = ';;;;;;;;;;;;;**====,,=,,========*=**=*=**=*=**=*=*=* '
+    hard_str2 = ''
+    for i in hard_str1:
+        hard_str2 += chr(ord(i)+1)
+    local4 = len(hard_str2) + 2
+    hardcode_name = []
+    for i in hard_str2:
+        hardcode_name.append(ord(i))
+    hardcode_name.append(0)
+    for i in name:
+        hardcode_name.append(ord(i))
+    hardcode_name.append(0)
+
+    for i in range(0, 100):
+        ecx = hardcode_name[i]
+        if ecx > 0x3C:
+            if ecx == 0x3e:
+                local4 += 1
+            elif ecx == 0x5B:
+                ecx = local4
+                if hardcode_name[ecx-1]:
+                    continue
+                else:
+                    i += 1
+                    while True:
+                        if hardcode_name[i] == 0x5D:
+                            break
+                        else:
+                            i += 1
+                            continue
+            elif ecx == 0x5D:
+                ecx = local4
+                if hardcode_name[ecx-1]:
+                    continue
+                else:
+                    i -= 1
+                    while True:
+                        if hardcode_name[i] == 0x5D:
+                            break
+                        else:
+                            i -= 1
+                            continue
+        elif ecx == 0x3c:
+            local4 -= 1
+        elif ecx == 0x21:
+            break
+        elif ecx == 0x2B:
+            ecx = local4
+            hardcode_name[ecx-1] += 1
+        elif ecx == 0x2D:
+            ecx = local4
+            hardcode_name[ecx-1] -= 1
+    edi = 0x19f568
+    for i in range(1, 10):
+        eax = len(hard_str2) + i
+        try:
+            eax = hardcode_name[eax-1]
+        except IndexError as e:
+            continue
+        edi += eax
+    print(edi)
+```
+
+
+
+## 064-CR-Game0.7
+
+7个level太多了，先放着，下一题。
+
+
+
+## 065-Eternal Bliss
+
+草，VB。
+
+真是个一眼万年的崽种。
+
+![image-20230804145707915](./reverse.assets/image-20230804145707915.png)
+
+得，连在哪读的serial都没找到。
+
+虽然有一堆的跳转，但每次都在第一个就跳了。
+
+![image-20230804161830165](./reverse.assets/image-20230804161830165.png)
+
+后面发现是在4037D1这个地方跳了正确的跳转。
+
+![image-20230804172607229](./reverse.assets/image-20230804172607229.png)
+
+看了眼视频，用VB Decompiler进行反编译就能看到序列号（好抽象
+
+投降投降，尬题。
+
+
+
+## 066-Andrnalin.3
+
+使用VB Decompiler
+
+![image-20230807095810633](./reverse.assets/image-20230807095810633.png)
+
+然后我gpt了一下，居然连逆向过程都能找到，有点离谱。
+
+![image-20230807101251072](./reverse.assets/image-20230807101251072.png)
+
+不过让他直接给结果的时候是给错了。
+
+![image-20230807101328420](./reverse.assets/image-20230807101328420.png)
+
+debug了一下，变形的过程确实只是每个字符加了0x0A。
+
+![image-20230807134734064](./reverse.assets/image-20230807134734064.png)
+
+```python
+def crackme66():
+    hard_str = 'kXy^rO|*yXo*m\kMuOn*+'
+    serial = ''
+    for i in hard_str:
+        serial += chr(ord(i)-10)
+    print(serial)
+```
+
+
+
+## 067-CarLitoZ.1
+
+怎么还是VB？？这次有点抽象了，不太直观。
+
+![image-20230807140840595](./reverse.assets/image-20230807140840595.png)
+
+在od里跟了一圈人晕了，看视频学习一下。
+
+vb decompiler分析得serial为8位，且字符串应该贼长。
+
+![image-20230807173657132](./reverse.assets/image-20230807173657132.png)
+
+ctrl + g到赋值的地方看看，发现call之后栈上出现了字符串。
+
+![image-20230807174009868](./reverse.assets/image-20230807174009868.png)
+
+![image-20230807174248936](./reverse.assets/image-20230807174248936.png)
+
+follow dump看字符串，串之大，一图截不下。然后视频还介绍了该程序是如何根据dat文件内容判断当前注册状态的，不过很简单，就不放在这里说了。
+
+![image-20230807174446864](./reverse.assets/image-20230807174446864.png)
+
+因为是固定字符串取某几位这种操作，那就不写注册机直接给结论了。vb编译器是vb程序最好的保护伞。
+
+![image-20230807175057132](./reverse.assets/image-20230807175057132.png)
+
+```
+rkh1oyie
+```
+
+
+
+## 068-figugegl.3
+
+感动，终于不是vb了。尝试了一下，没好到哪里去，完全搜不到字符串，看得到搜不到~
+
+![image-20230807181728132](./reverse.assets/image-20230807181728132.png)
+
+跑了一遍之后又能搜到了（？
+
+![image-20230807182042412](./reverse.assets/image-20230807182042412.png)
+
+找到Success部分，发现了获取文本框输入的函数。
+
+![image-20230808091620833](./reverse.assets/image-20230808091620833.png)
+
+终。
+
+![image-20230808112420536](./reverse.assets/image-20230808112420536.png)
+
+```python
+def crackme68():
+    hard_str = '203945709398475029384750293875577934765620110289347563929867122287863095762304984875020398746563'
+    name = 'wwa1ex'
+    serial = ''
+    for i in name:
+        edx = ord(i) - 0x20
+        serial += hard_str[edx]
+    print(serial)
+```
+
+
+
+## 069-ArturDents-CrackMe#4
+
+![image-20230808135627777](./reverse.assets/image-20230808135627777.png)
+
+```python
+def crackme69():
+    name = 'wa1ex'
+    serial = ''
+    for i in name:
+        esi = ord(i)
+        ecx = 0x6
+        eax = esi//ecx
+        edx = esi
+        edx >>= 0x2
+        eax *= edx
+        temp = eax
+
+        ecx = 0xA
+        edx = esi//ecx
+        eax = temp
+        result = eax//edx
+        serial += str(result)
+    print('ADCM4-' + serial + '-YEAH!')
+```
+
+
+
+## 070-CodeFantasy-crackme
+
+题目说自己很简单，观望一下。
+
+确实简单，硬编码。
+
+![image-20230808141352356](./reverse.assets/image-20230808141352356.png)
+
+![image-20230808142933073](./reverse.assets/image-20230808142933073.png)
+
+![image-20230808143344938](./reverse.assets/image-20230808143344938.png)
+
+
+
+## 071-Rith.1
+
+![image-20230821102341178](./reverse.assets/image-20230821102341178.png)
+
+```python
+def crackme71():
+    name = 'wa1ex1'
+    hardcode = '31415926535897932384'
+    serial = ''
+    eax = 0
+    for i in range(0, len(name)):
+        al = ord(name[i])
+        ebp = ord(hardcode[i])
+        edx = al % ebp
+        eax = edx * 2
+        if eax > 0x7B:
+            eax -= 0x1A
+        if eax < 0x41:
+            edx = 0x82
+            edx -= eax
+            eax = edx
+        if (eax > 0x5B) and (eax < 0x61):
+            eax = eax % 10 + 0x30
+        serial += chr(eax)
+    print(serial)
+```
+
+
+
+## 072-Lesco_crackme01
+
+这题有点搞，有两个验证逻辑，而且有一个放在了"正确"的messagebox里面。
+
+![image-20230821142656720](./reverse.assets/image-20230821142656720.png)
+
+很离谱。
+
+![image-20230821143123744](./reverse.assets/image-20230821143123744.png)
