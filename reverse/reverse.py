@@ -932,6 +932,8 @@ def crackme72():
     ax = (ax * ax) & 0xFFFF
     ax ^= 0xAB6C
     print(hex(ax))
+    #
+    #
 
 
 
