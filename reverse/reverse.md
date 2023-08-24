@@ -2436,3 +2436,118 @@ def crackme71():
 很离谱。
 
 ![image-20230821143123744](./reverse.assets/image-20230821143123744.png)
+
+由于第一个验证逻辑的调用的MessageBoxA总会走到MessageBoxExA，所以第一个对不对应该是无所谓的。
+
+其实在写完上面内容之后，我有个问题就是：它到底在什么地方压进了messagebox的参数，没看到和弹窗字符串一致的信息。今天再看的时候发现注释里标的完全是个误导项，传参的地方就是这里。沿着4034F8往上发现这两个字符串居然是一个字符一个字符拼出来的，真是难为他了。
+
+![image-20230824093715285](./reverse.assets/image-20230824093715285.png)
+
+![image-20230824093846368](./reverse.assets/image-20230824093846368.png)
+
+![image-20230824104959612](./reverse.assets/image-20230824104959612.png)
+
+```python
+def crackme72():
+    name = 'wa1ex'
+    # 假
+    pos_4038FC = len(name)
+    serial = ''
+    for i in range(0, len(name) + 1):
+        ecx = (pos_4038FC * (i+1) + 0x17) ^ 0xF
+        eax = ecx
+        serial += str(eax)
+    print(serial)
+    # 真
+    serial = ''
+    ax = ((ord(name[1]) << 8) + ord(name[0])) ^ 0xE32F
+    ax = (ax * ax) & 0xFFFF
+    ax ^= 0xAB6C
+    cx = 0
+    bx = 0
+    for i in name:
+        stack_eax = ax
+        stack_ecx = cx
+        dx = ord(i)
+        cx = ax % 0x100
+        dx = (dx * cx) & 0xFFFF
+        cx = ax // 0x100
+        dx = (dx * cx) & 0xFFFF
+        cx = stack_ecx
+        dx ^= 0x45EB
+        dx >>= 2
+        dx += dx
+        cx += 1
+        stack_edx = dx
+        stack_eax = ax
+        stack_ebx = bx
+        ax = cx
+        ebx = 0x2
+        dx = ax % ebx
+        ax //= ebx
+        bx = stack_ebx
+        ax = stack_eax
+        flag = dx
+        dx = stack_edx
+        if flag:
+            serial += hex(dx)[2:].lower()
+        else:
+            serial += hex(dx)[2:].upper()
+    print(serial)
+```
+
+
+
+## 073-abexcrackme3
+
+创建一个内容为18个字符的abex.l2c文件。？
+
+
+
+## 074-Cosh.1
+
+在je的地方下了个断点给我干懵了，不知道为啥函数头没断下来。
+
+调了一下发现是这里call过来的
+
+![image-20230824112208841](./reverse.assets/image-20230824112208841.png)
+
+![image-20230824112231166](./reverse.assets/image-20230824112231166.png)
+
+继续下断点，发现在点check的时候，eax的值是401207，这个位置已经在函数头下面了。那确实断不到。
+
+![image-20230824112315465](./reverse.assets/image-20230824112315465.png)
+
+![image-20230824112346219](./reverse.assets/image-20230824112346219.png)
+
+看了一下，应该是要在U盘里读文件，摆了。
+
+![image-20230824135350706](./reverse.assets/image-20230824135350706.png)
+
+![image-20230824135334658](./reverse.assets/image-20230824135334658.png)
+
+
+
+## 075-blaster99
+
+爆破方式需要看一下，有点蒙住了。
+
+注册机就是硬编码`2G83G35Hs2`。
+
+![image-20230824141531405](./reverse.assets/image-20230824141531405.png)
+
+
+
+## 076-ArturDents-CrackMe#1
+
+这？
+
+![image-20230824142816475](./reverse.assets/image-20230824142816475.png)
+
+
+
+## 077-BuLLeT.8
+
+看着贼怪，感觉有壳，根据esp定律脱壳。
+
+下不到合适的断点位置，估摸着要用dephi特攻程序了。
