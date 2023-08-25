@@ -934,5 +934,22 @@ def crackme72():
     print(hex(ax))
 
 
+def crackme81():
+    eax = 500794
+    ecx = 0x78C
+    eax //= ecx
+    eax *= 0x399
+    eax <<= 17
+    if eax >= 0x100000000:
+        eax %= 0x100000000
+    eax >>= 9
+    ecx = 0xC
+    eax //= ecx
+    print(eax)
 
-crackme72()
+
+def crackme82():
+    name = 'wa1ex'
+    ecx = ((ord(name.upper()[0]) * len(name)) << 0xC) + 0x3930E - 0x14
+    print(ecx)
+crackme82()

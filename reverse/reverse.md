@@ -2551,3 +2551,84 @@ def crackme72():
 看着贼怪，感觉有壳，根据esp定律脱壳。
 
 下不到合适的断点位置，估摸着要用dephi特攻程序了。
+
+特攻完毕，在44A2E8处下断点。
+
+![image-20230825104903605](./reverse.assets/image-20230825104903605.png)
+
+调了半天，通过在变形字符串的内存处下断点的方式，定位到408044这个函数，但不太精准（后面发现不精准的原因是程序在初始化字符串的时候莫名其妙的动了一下第一个字节，我正好在这个位置下了断点，导致定位函数错了）。总之通过一通操作，发现在408253这个地方正式写入。
+
+![image-20230825113224729](./reverse.assets/image-20230825113224729.png)
+
+真费劲啊。
+
+寄，发现它写入的时候是在把十六进制的值转成ascii，也就是说这个地方写入的其实还不是算法call。
+
+
+
+## 078-CodeZero.1
+
+这
+
+![image-20230825135450412](./reverse.assets/image-20230825135450412.png)
+
+![image-20230825135646143](./reverse.assets/image-20230825135646143.png)
+
+
+
+## 079-DueList.5
+
+又一题摸不着头脑的。
+
+
+
+## 080-cupofcoffe
+
+这题居然还分了1和2
+
+这第一题输完之后跳了个什么阴间东西草。
+
+`..........`
+
+![image-20230825145353775](./reverse.assets/image-20230825145353775.png)
+
+第二题还特么是`..........`
+
+![image-20230825145804550](./reverse.assets/image-20230825145804550.png)
+
+乐了。
+
+
+
+## 081-fireworx.9
+
+![image-20230825154200193](./reverse.assets/image-20230825154200193.png)
+
+```python
+def crackme81():
+    eax = 500794
+    ecx = 0x78C
+    eax //= ecx
+    eax *= 0x399
+    eax <<= 17
+    if eax >= 0x100000000:
+        eax %= 0x100000000
+    eax >>= 9
+    ecx = 0xC
+    eax //= ecx
+    print(eax)
+```
+
+
+
+## 082-phox.1
+
+![image-20230825161622357](./reverse.assets/image-20230825161622357.png)
+
+```python
+def crackme82():
+    name = 'wa1ex'
+    ecx = ((ord(name.upper()[0]) * len(name)) << 0xC) + 0x3930E - 0x14
+    print(ecx)
+```
+
