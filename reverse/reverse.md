@@ -2632,3 +2632,34 @@ def crackme82():
     print(ecx)
 ```
 
+
+
+## 083-Pusillus
+
+这代码跑得比我想象中的要快。
+
+```python
+朱可涵 8-30 18:00:02
+[图片]
+
+朱可涵 8-30 18:09:16
+def crackme83():
+    serial = [0x71, 0x18, 0x59, 0x1B, 0x79, 0x42, 0x45, 0x4C]
+    result = []
+    result_str = ''
+    for xor_value in range(0, 0xFF):
+        temp = [i ^ xor_value for i in serial]
+        print(temp)
+        val1 = 0
+        for j in temp:
+            val1 ^= j
+        if val1 == xor_value:
+            result.append(temp)
+    print("本题有{}解".format(len(result)))
+    for i in result:
+        for j in i:
+            result_str += chr(j ^ 0x32)
+    print(result_str)
+```
+
+![image-20230830180905472](./reverse.assets/image-20230830180905472.png)

@@ -952,4 +952,50 @@ def crackme82():
     name = 'wa1ex'
     ecx = ((ord(name.upper()[0]) * len(name)) << 0xC) + 0x3930E - 0x14
     print(ecx)
-crackme82()
+
+
+def crackme83():
+    serial = [0x71, 0x18, 0x59, 0x1B, 0x79, 0x42, 0x45, 0x4C]
+    result = []
+    result_str = ''
+    for xor_value in range(0, 0xFF):
+        temp = [i ^ xor_value for i in serial]
+        print(temp)
+        val1 = 0
+        for j in temp:
+            val1 ^= j
+        if val1 == xor_value:
+            result.append(temp)
+    print("本题有{}解".format(len(result)))
+    for i in result:
+        for j in i:
+            result_str += chr(j ^ 0x32)
+    print(result_str)
+
+
+
+    # 正推
+    # name = 'wa1ex'
+    # changed_name = []
+    # c2 = []
+    # for i in range(0, 8):
+    #     try:
+    #         changed_name.append(ord(name[i]) ^ 0x32)
+    #     except:
+    #         changed_name.append(0x32)
+    # for i in range(0, 8, 2):
+    #     c2.append(changed_name[i] ^ changed_name[i+1])
+    # al = c2[0]
+    # bl = c2[1]
+    # al ^= bl
+    # bl = c2[2]
+    # cl = c2[3]
+    # bl ^= cl
+    # al ^= bl
+    # for i in range(0, 8):
+    #     changed_name[i] ^= al
+    # print(changed_name)
+
+
+
+crackme83()
