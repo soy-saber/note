@@ -2639,10 +2639,6 @@ def crackme82():
 这代码跑得比我想象中的要快。
 
 ```python
-朱可涵 8-30 18:00:02
-[图片]
-
-朱可涵 8-30 18:09:16
 def crackme83():
     serial = [0x71, 0x18, 0x59, 0x1B, 0x79, 0x42, 0x45, 0x4C]
     result = []
@@ -2663,3 +2659,44 @@ def crackme83():
 ```
 
 ![image-20230830180905472](./reverse.assets/image-20230830180905472.png)
+
+
+
+## 084-slayer_crackme1
+
+下断点一直断不下来，不知道哪里出问题了。
+
+![image-20230830181703472](./reverse.assets/image-20230830181703472.png)
+
+
+
+## 085-easycrackme
+
+![image-20230831103714090](./reverse.assets/image-20230831103714090.png)
+
+```python
+def crackme85():
+    name = 'fatestede'
+    serial_str = "2611791907107919791926117919071078563412F0DEBC9A3434121278787878C6CCC6CC00CC00CCFFEFEFFF5555CCDD89876767CCCBCECEAB99887766773344"
+    eax = 1
+    esi = 0
+    edx = len(name)
+    for i in name:
+        ecx = ord(i)
+        edi = eax - 1
+        ecx *= edi
+        esi += ecx
+        eax += 1
+    ebx = (edx * 2 + 0x63) & 0xFFFF
+    esi &= 0xFFFF
+    ebx <<= 0x10
+    esi += ebx
+    esi &= 0xF
+    ebx = esi * 4 * 2
+    init_result = serial_str[ebx:ebx+8]
+    result = ''
+    for i in range(0, 8, 2):
+        result = init_result[i:i+2] + result
+    print(eval('0x' + result))
+```
+

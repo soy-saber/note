@@ -971,9 +971,6 @@ def crackme83():
         for j in i:
             result_str += chr(j ^ 0x32)
     print(result_str)
-
-
-
     # 正推
     # name = 'wa1ex'
     # changed_name = []
@@ -997,5 +994,29 @@ def crackme83():
     # print(changed_name)
 
 
+def crackme85():
+    name = 'fatestede'
+    serial_str = "2611791907107919791926117919071078563412F0DEBC9A3434121278787878C6CCC6CC00CC00CCFFEFEFFF5555CCDD89876767CCCBCECEAB99887766773344"
+    eax = 1
+    esi = 0
+    edx = len(name)
+    for i in name:
+        ecx = ord(i)
+        edi = eax - 1
+        ecx *= edi
+        esi += ecx
+        eax += 1
+    ebx = (edx * 2 + 0x63) & 0xFFFF
+    esi &= 0xFFFF
+    ebx <<= 0x10
+    esi += ebx
+    esi &= 0xF
+    ebx = esi * 4 * 2
+    init_result = serial_str[ebx:ebx+8]
+    result = ''
+    for i in range(0, 8, 2):
+        result = init_result[i:i+2] + result
+    print(eval('0x' + result))
 
-crackme83()
+
+crackme85()
