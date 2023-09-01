@@ -2700,3 +2700,17 @@ def crackme85():
     print(eval('0x' + result))
 ```
 
+
+
+## 086-crackme_0007
+
+题目大致是看懂了，但流程怕是长的要死了。
+
+懒癌犯了，下一题，这每个call都要跟一遍我是真的懒得搞。
+
+![image-20230901102905505](./reverse.assets/image-20230901102905505.png)
+
+
+
+## 087-d4ph1-crackme2
+

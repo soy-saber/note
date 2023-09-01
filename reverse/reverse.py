@@ -1019,4 +1019,19 @@ def crackme85():
     print(eval('0x' + result))
 
 
-crackme85()
+def crackme86():
+    # 太长了 不管了
+    name = 'wa1ex'
+    serial = '1234567890123456'
+    pos_4031AC = len(serial)
+    total = 0
+    for i in name:
+        total += ord(i)
+    print(total)
+    total = 0
+    for i in serial:
+        total += ord(i)
+    print(hex(total))
+
+
+crackme86()
