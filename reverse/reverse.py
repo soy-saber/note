@@ -1020,18 +1020,32 @@ def crackme85():
 
 
 def crackme86():
-    # 太长了 不管了
-    name = 'wa1ex'
-    serial = '1234567890123456'
-    pos_4031AC = len(serial)
+    # 第一位hardcode
+    hardcode = [0x48, 0x54, 0x2d, 0x37]
+    pos1to4 = 'HT-7'
+
+    # 第二位
+    # 第5,7,10,11位相同 1111
+    # 用户名ascii码累加后除以用户名长度和第6位相同 d
+    name = 'wwa1ex'
     total = 0
     for i in name:
         total += ord(i)
-    print(total)
-    total = 0
-    for i in serial:
-        total += ord(i)
-    print(hex(total))
+    pos6 = chr(total // 6)
+    pos5to11 = '1' + pos6 + '1' + name[1] + name[-2] + '11'
+    # 第8、9位的和 和 用户名的第2位和倒数第2位的和 相等
+    # 第10位和第11位的和除2余0（可忽略，因为10和11相同）
 
-
+    # 第三位
+    # 用户名长度模3为0 第12位操作了半天没发现有啥用
+    # 第13位和6位的和 整除除以2
+    # 第13、14、15位的和 + 用户名长 = 0x10A
+    # 第16位和用户名的倒数第2位一致
+    pos12 = 'w'
+    pos13 = chr(ord(pos6) + 1)
+    pos14 = chr((0x10A - len(name) - ord(pos13))//2)
+    pos15 = chr(0x10A - len(name) - ord(pos13) - ord(pos14))
+    pos16 = name[-2]
+    pos12to16 = pos12 + pos13 + pos14 + pos15 + pos16
+    print(pos1to4 + pos5to11 + pos12to16)
 crackme86()
