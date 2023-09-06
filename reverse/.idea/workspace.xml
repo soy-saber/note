@@ -73,4 +73,11 @@
     </task>
     <servers />
   </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="eax" language="Python" />
+      </configuration>
+    </watches-manager>
+  </component>
 </project>

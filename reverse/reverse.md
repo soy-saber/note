@@ -2762,3 +2762,113 @@ def crackme86():
 
 ## 087-d4ph1-crackme2
 
+用户名的ascii码值转成了16进制。
+
+![image-20230905150750789](./reverse.assets/image-20230905150750789.png)
+
+总共分了四个部分：
+
+1、用户名的ascii码转16进制
+
+2、字符串变形记1，里头的字节序差点没给我干碎，代码还写成了先除再余的沙雕操作，debug给我de吐了
+
+3、字符串变形记2好一点，但也只是好一点
+
+4、变形成serial，倒是简单了
+
+真特么繁琐啊。
+
+![image-20230906142528501](./reverse.assets/image-20230906142528501.png)
+
+```python
+def crackme87():
+    name = 'wa1ex'
+    hex_name = []
+    for i in name:
+        ascii_num = hex(ord(i))
+        hex_name.append(ord(ascii_num[2]))
+        hex_name.append(ord(ascii_num[3]))
+    hex_name.append(0)
+    print(hex_name)
+
+    esi = 1
+    edi = 0
+    pos_4034A2 = 0
+    i = 0
+    changed_str = []
+    while i < len(hex_name) - 1:
+        al = hex_name[i]
+        bl = hex_name[i+1]
+        if al == bl:
+            esi += 1
+            pos_4034A2 += 1
+            i += 1
+            if pos_4034A2 != 1:
+                edi -= 2
+                esi += 1
+        else:
+            if pos_4034A2 <= 1:
+                pass
+            else:
+                edi -= 2
+            pos_4034A2 = 0
+            esi = 1
+        eax = al << 8
+        edx = esi + eax
+        i += 1
+        if edi >= len(changed_str):
+            changed_str.append(hex(esi))
+            changed_str.append(hex(al))
+        else:
+            changed_str[edi] = hex(esi)
+            changed_str[edi+1] = hex(al)
+        edi += 2
+        if hex_name[i] == 0:
+            break
+    print(changed_str)
+
+    pos_40331C = len(changed_str)
+    changed_str2 = []
+    edx = 0
+    i = 1
+    esi = 1
+    while i <= len(name):
+        ebx = (eval(changed_str[esi]) << 8) + eval(changed_str[esi-1])
+        eax = ord(name[i-1])
+        eax = eax + ebx - i
+        edx = eax % i
+        eax //= i
+        eax -= pos_40331C
+        ebx += i
+        eax += edx
+        eax ^= ebx
+        changed_str2.append(eax & 0xFF)
+        esi += 1
+        if esi >= pos_40331C:
+            esi = 1
+        i += 1
+    print(changed_str2)
+    edx = len(name) * 2
+    esi = ecx = 0
+    serial = ''
+    while esi != edx:
+        ebx = bl = changed_str2[ecx]
+        bl >>= 4
+        al = bl
+        al &= 0xF
+        al += 0x30
+        if al > 0x39:
+            al += 7
+        serial += chr(al)
+        esi += 1
+        al = (ebx & 0xFF)
+        al &= 0xF
+        al += 0x30
+        if al > 0x39:
+            al += 7
+        ecx += 1
+        serial += chr(al)
+        esi += 1
+    print(serial)
+```
+
