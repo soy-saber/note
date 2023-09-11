@@ -1141,5 +1141,64 @@ def crackme87():
     print(serial)
 
 
+def crackme89():
+    name = 'wa1ex'
+    magic_str1 = 'IIII$9999'
+    serial = ''
+    for i in magic_str1:
+        serial += chr(ord(i) ^ 0x9)
+    print(serial)
+    # @@@@-0000
 
-crackme87()
+
+def crackme90():
+    name = 'wa1ex'
+    magic_list = [0xEF, 0xCA, 0x69, 0xD0, 0xF9]
+    changed_name = []
+    for i in name:
+        changed_name.append((ord(i) ^ 0x3) * 2)
+    print(changed_name)
+    edi = 0x12
+    i = 0
+    while edi != 0:
+        dl = magic_list[i]
+
+
+def crackme91():
+    name = 'wa1ex'
+    magic_str = 'biq2jrxc-ape3*dsynhz8gt5o7f0uml4v19w6+/k'
+    trans_str = ''
+    for i in name:
+        eax = ord(i)
+        ecx = eax * 5
+        eax = ecx * 8 + eax
+        ecx = 0x28
+        edx = eax % ecx
+        eax //= ecx
+        dl = ord(magic_str[edx])
+        trans_str += chr(dl)
+    print(trans_str)
+    magic_str2 = '-apeoiq2jrml4xcsw6ynh7f0uv19+3/k*dbz8gt5'
+    for i in name:
+        ecx = ord(i)
+        eax = ecx
+        eax <<= 0x5
+        eax -= ecx
+        ecx = 0x28
+        edx = eax % ecx
+        dl = ord(magic_str2[edx])
+        trans_str += chr(dl)
+    print(trans_str)
+    magic_str3 = 'h7f0uv19+3/kjrml4xcsw6yn*dbz8gt5-apeoiq2'
+    for i in range(0, len(trans_str)):
+        eax = ord(trans_str[i])
+        ecx = eax * 5
+        eax = eax + 2 * ecx
+        ecx = 0x28
+        edx = eax % ecx
+        dl = ord(magic_str3[edx])
+        trans_str = trans_str[:i] + chr(dl) + trans_str[i+1:]
+    print(trans_str)
+
+
+crackme91()

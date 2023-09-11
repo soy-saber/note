@@ -2872,3 +2872,98 @@ def crackme87():
     print(serial)
 ```
 
+
+
+## 088-[KFC]fish's CrackMe
+
+好像有反调试，在主程序里下断之后寄了
+
+![image-20230906181212439](./reverse.assets/image-20230906181212439.png)
+
+[AntiOd IsDebuggerPresent + CRC 验证 + 对明文字符串的处理_weixin_34194702的博客-CSDN博客](https://blog.csdn.net/weixin_34194702/article/details/89746998)
+
+![image-20230907092545188](./reverse.assets/image-20230907092545188.png)
+
+
+
+## 089-fornixcrackme1
+
+算法应该是集中在了这3个call里。
+
+![image-20230907112723413](./reverse.assets/image-20230907112723413.png)
+
+这题友善的就离谱。
+
+![image-20230907141453366](./reverse.assets/image-20230907141453366.png)
+
+```python
+def crackme89():
+    name = 'wa1ex'
+    magic_str1 = 'IIII$9999'
+    serial = ''
+    for i in magic_str1:
+        serial += chr(ord(i) ^ 0x9)
+    print(serial)
+    # @@@@-0000
+```
+
+
+
+## 090-tc.12
+
+![image-20230907154117598](./reverse.assets/image-20230907154117598.png)
+
+![image-20230907155924820](./reverse.assets/image-20230907155924820.png)
+
+哇，好抽象的题目，call是一层套着一层，蚌埠住了。（又看了一遍还是没蚌住，乐了）
+
+重新看了一下Dededark，确认了是否成功的判断跳转处。
+
+![image-20230911135948619](./reverse.assets/image-20230911135948619.png)
+
+
+
+## 091-DOSKEY-CRACKME2
+
+90题看的我好烦躁，决定先看下一题。
+
+![image-20230911161405090](./reverse.assets/image-20230911161405090.png)
+
+```python
+def crackme91():
+    name = 'wa1ex'
+    magic_str = 'biq2jrxc-ape3*dsynhz8gt5o7f0uml4v19w6+/k'
+    trans_str = ''
+    for i in name:
+        eax = ord(i)
+        ecx = eax * 5
+        eax = ecx * 8 + eax
+        ecx = 0x28
+        edx = eax % ecx
+        eax //= ecx
+        dl = ord(magic_str[edx])
+        trans_str += chr(dl)
+    print(trans_str)
+    magic_str2 = '-apeoiq2jrml4xcsw6ynh7f0uv19+3/k*dbz8gt5'
+    for i in name:
+        ecx = ord(i)
+        eax = ecx
+        eax <<= 0x5
+        eax -= ecx
+        ecx = 0x28
+        edx = eax % ecx
+        dl = ord(magic_str2[edx])
+        trans_str += chr(dl)
+    print(trans_str)
+    magic_str3 = 'h7f0uv19+3/kjrml4xcsw6yn*dbz8gt5-apeoiq2'
+    for i in range(0, len(trans_str)):
+        eax = ord(trans_str[i])
+        ecx = eax * 5
+        eax = eax + 2 * ecx
+        ecx = 0x28
+        edx = eax % ecx
+        dl = ord(magic_str3[edx])
+        trans_str = trans_str[:i] + chr(dl) + trans_str[i+1:]
+    print(trans_str)
+```
+
