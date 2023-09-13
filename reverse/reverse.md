@@ -2967,3 +2967,43 @@ def crackme91():
     print(trans_str)
 ```
 
+
+
+## 092-FaNtOm-crackme6
+
+![image-20230912154227973](./reverse.assets/image-20230912154227973.png)
+
+![image-20230912154241140](./reverse.assets/image-20230912154241140.png)
+
+```python
+# 6 1
+# 9 3
+# 10 0
+```
+
+
+
+## 093-kesan
+
+懵逼。不知道算法call在哪。
+
+![image-20230912171824143](./reverse.assets/image-20230912171824143.png)
+
+看了眼视频，这次还真是在内存下hardware断点找到的算法call。
+
+![image-20230912181335868](./reverse.assets/image-20230912181335868.png)
+
+![image-20230913093127820](./reverse.assets/image-20230913093127820.png)
+
+```python
+def crackme93():
+    name = 'wa1ex'
+    serial = ''
+    edx = 0x12DFD16
+    for i in name:
+        cl = (ord(i) ^ 0xCA) & 0xFF
+        edx += cl
+    edx ^= 0x19840808
+    print(hex(edx)[2:])
+```
+

@@ -1201,4 +1201,14 @@ def crackme91():
     print(trans_str)
 
 
-crackme91()
+def crackme93():
+    name = 'wa1ex'
+    serial = ''
+    edx = 0x12DFD16
+    for i in name:
+        cl = (ord(i) ^ 0xCA) & 0xFF
+        edx += cl
+    edx ^= 0x19840808
+    print(hex(edx)[2:])
+
+crackme93()
