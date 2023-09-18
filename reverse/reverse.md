@@ -3007,3 +3007,72 @@ def crackme93():
     print(hex(edx)[2:])
 ```
 
+
+
+## 094-TheBigMan-crackme6
+
+每次点击和输入都会运行验证一次
+
+通过call找GetDlgItemTextA
+
+![image-20230914172148132](./reverse.assets/image-20230914172148132.png)
+
+![image-20230918153901943](./reverse.assets/image-20230918153901943.png)
+
+```python
+def crackme94():
+    # 要求serial的第一个ascii值能整除4536
+    # print(0x11CF - 0x17) 4536 2 2 2 3 3 3 3 7
+    # 必须是T，算法里硬加了个T出来
+    # print(ord('T')) 84
+    temp = ''
+    serial = 'T'
+    magic_list = [0x00, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50,
+                  0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A]
+    name = 'wa1ex'
+    name_value = 0
+    for i in name:
+        name_value += ord(i)
+    for i in range(0, len(name)):
+        edi = ord(name[i])
+        ecx = (i << 2)
+        edx = i + 1
+        ecx -= edx
+        ecx = magic_list[ecx + 1]
+        edx = edi
+        edx ^= ecx
+        ecx = name_value
+        ecx *= i
+        ecx -= name_value
+        esi = ecx
+        # esi ^= 0xFFFFFFFF
+        esi = -esi - 1
+        esi = esi + edx + 0x14D
+        ecx = len(name)
+        edx = i + 3
+        ecx *= edx
+        ecx *= edi
+        eax = esi
+        eax += ecx
+        ecx = 0xA
+        edx = eax % ecx + 0x30
+        edi = edx ^ 0xADAC
+        esi = i + 2
+        eax = edi
+        eax *= esi
+        edx = eax % 0xA + 0x30
+        temp += chr(edx)
+    eax = len(name) * name_value
+    ecx = 0x64
+    edx = eax % ecx + 0x30
+    temp = 'T' + temp + '-' + str(edx)
+    for i in range(1, len(temp)):
+        edi = ord(temp[i])
+        eax = edi
+        eax ^= 0x20
+        ecx = 0xA
+        edi = eax % ecx + 0x30
+        serial += chr(edi)
+    print(serial)
+```
+
