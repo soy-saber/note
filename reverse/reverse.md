@@ -3076,3 +3076,112 @@ def crackme94():
     print(serial)
 ```
 
+
+
+## 095-tengxingCrackMe_v1.1
+
+![企业微信截图_16951799312729](./reverse.assets/企业微信截图_16951799312729.png)
+
+![企业微信截图_16951799342362](./reverse.assets/企业微信截图_16951799342362.png)
+
+看了之后我更想不通了，这byte test怎么可能为1呢，不理解了。
+
+![image-20230920112227454](./reverse.assets/image-20230920112227454.png)
+
+![image-20230920112249625](./reverse.assets/image-20230920112249625.png)
+
+![image-20230920112306539](./reverse.assets/image-20230920112306539.png)
+
+看了眼视频下面的评论区意识到test范围可能不止[ebp-0x44]，local17在初始化的时候初始化了0x8个四字节长度。
+
+![image-20230920143212538](./reverse.assets/image-20230920143212538.png)
+
+![image-20230920143404323](./reverse.assets/image-20230920143404323.png)
+
+另起一段：估摸着有一个月没更新crackme了，除了这一个月确实活多以外，这题的狗屎程度也是远超我的意料，虽然它并没有被收录在ede精选题库当中。应该从哪里开始说起呢，它的算法check长度总长0x4f6，包含了接近10个抽象的循环，且循环中夹杂了大量判断语句和许多不必要的变量增减，更很不幸的是这些都是绕不开的部分，你还真就得一行一行的给它看下来才行。就是由于这种混乱以及一开始对算法全貌的认知偏差，导致了解题流程的滞涩，但常言道福无双至祸不单行，还有个不幸的事在于你手欠把ollydebug一关：恭喜你之前做的注释和断点都没咯。好！下班！过两天：什么狗p代码，我之前看到哪了？很好，循环开始了。今天把工作做完，整出了一段完整的时间来再看这道题，发现算法整理出来还是很清晰的且并不复杂（竟然有特么的冒泡排序，真的逆天），那么作者和编译器的马最多只剩下一匹了（笑
+
+![image-20231110174336658](./reverse.assets/image-20231110174336658.png)
+										图片名：20分钟前的我和现在的我
+
+![image-20231113145411410](./reverse.assets/image-20231113145411410.png)
+
+```python
+def crackme95():
+    # 原代码没有从本质上理解问题，导致许多sb错误而且及其臃肿，参考ede代码如下
+    magic_list1 = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x03, 0xFE, 0xFF, 0xFF, 0x07, 0xFE, 0xFF, 0xFF, 0x07, 0x00,
+                   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+    magic_list2 = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFE, 0xFF, 0xFF, 0x07, 0xFE, 0xFF, 0xFF, 0x07, 0x00,
+                   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+
+    # python实现bt指令
+    def bt(a, b):
+        word = a[b//8]
+        index = b % 8
+        mask = 1 << index
+        if word & mask != 0:
+            return 1
+        else:
+            return 0
+
+    # 确认check得出的有效范围
+    start_pos = 0
+    flag = 0
+    for i in range(0, 255):
+        if bt(magic_list1, i) and flag == 0:
+            start_pos = i
+            flag = 1
+        if not bt(magic_list1, i) and flag == 1:
+            flag = 0
+            # check1(local17)
+            print("check1允许范围{}-{}".format(chr(start_pos), chr(i-1)))
+    # check2(local25)只允许大小写英文字母了
+
+    # 用户名存在三次变形
+    name = 'abcda'
+    name_reverse = name[::-1]
+    list_name = list(name)
+    list_name.sort()
+    name_sort = ''.join(list_name)
+    total_name = name + name_reverse + name_sort
+
+    # 算了一下偏差的范围在[-7,-26]
+    length = len(name)
+    bias_list = []
+    # check1
+    for i in range(0, length):
+        edx = length * 3
+        eax = (i+1) * 2
+        edx -= eax
+        edx -= 0x14
+        bias_list.append(edx)
+
+    # check2
+    for i in range(0, length):
+        edx = length * 3
+        eax = (i+1) * 3
+        edx -= eax
+        edx -= 0x14
+        bias_list.append(edx)
+
+    # check3
+    for i in range(0, length):
+        eax = length - 3
+        edx = eax * eax
+        eax = (i+1) * 2
+        edx -= eax
+        edx -= 0x14
+        bias_list.append(edx)
+    print(bias_list)
+
+    # 最终目的是：让正序用户名、倒序用户名、sort用户名在进行bias_list对应变换后仍然为大、小写字母
+    serial = ''
+    for i in range(0, len(total_name)):
+        temp = chr(ord(total_name[i]) + bias_list[i])
+        if temp.isalpha():
+            serial += temp
+        else:
+            print('out of range!change your name!')
+            return
+    print(serial)
+```
+

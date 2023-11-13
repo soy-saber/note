@@ -1286,4 +1286,82 @@ def crackme94():
     print(serial)
 
 
-crackme94()
+def crackme95():
+    # 原代码没有从本质上理解问题，导致许多sb错误而且及其臃肿，参考ede代码如下
+    magic_list1 = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x03, 0xFE, 0xFF, 0xFF, 0x07, 0xFE, 0xFF, 0xFF, 0x07, 0x00,
+                   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+    magic_list2 = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFE, 0xFF, 0xFF, 0x07, 0xFE, 0xFF, 0xFF, 0x07, 0x00,
+                   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+
+    # python实现bt指令
+    def bt(a, b):
+        word = a[b//8]
+        index = b % 8
+        mask = 1 << index
+        if word & mask != 0:
+            return 1
+        else:
+            return 0
+
+    # 确认check得出的有效范围
+    start_pos = 0
+    flag = 0
+    for i in range(0, 255):
+        if bt(magic_list1, i) and flag == 0:
+            start_pos = i
+            flag = 1
+        if not bt(magic_list1, i) and flag == 1:
+            flag = 0
+            # check1(local17)
+            print("check1允许范围{}-{}".format(chr(start_pos), chr(i-1)))
+    # check2(local25)只允许大小写英文字母了
+
+    # 用户名存在三次变形
+    name = 'abcda'
+    name_reverse = name[::-1]
+    list_name = list(name)
+    list_name.sort()
+    name_sort = ''.join(list_name)
+    total_name = name + name_reverse + name_sort
+
+    # 算了一下偏差的范围在[-7,-26]
+    length = len(name)
+    bias_list = []
+    # check1
+    for i in range(0, length):
+        edx = length * 3
+        eax = (i+1) * 2
+        edx -= eax
+        edx -= 0x14
+        bias_list.append(edx)
+
+    # check2
+    for i in range(0, length):
+        edx = length * 3
+        eax = (i+1) * 3
+        edx -= eax
+        edx -= 0x14
+        bias_list.append(edx)
+
+    # check3
+    for i in range(0, length):
+        eax = length - 3
+        edx = eax * eax
+        eax = (i+1) * 2
+        edx -= eax
+        edx -= 0x14
+        bias_list.append(edx)
+    print(bias_list)
+
+    # 最终目的是：让正序用户名、倒序用户名、sort用户名在进行bias_list对应变换后仍然为大、小写字母
+    serial = ''
+    for i in range(0, len(total_name)):
+        temp = chr(ord(total_name[i]) + bias_list[i])
+        if temp.isalpha():
+            serial += temp
+        else:
+            print('out of range!change your name!')
+            return
+    print(serial)
+
+crackme95()
