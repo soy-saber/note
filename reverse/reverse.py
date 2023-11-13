@@ -1364,4 +1364,29 @@ def crackme95():
             return
     print(serial)
 
-crackme95()
+
+def crackme96():
+    name = 'walex'
+    local5 = 0x4D
+    local6 = 0x60FF58
+    local7 = 0x401220
+    local8 = 0x401220
+    for i in name:
+        edx = ord(i)
+        local5 = 80 * edx + local5
+        local6 = (local5 + local6) ^ 0x32
+        local7 = local6 * 4 + local7
+        local8 = local5 + local6 + local7
+    print(hex(local8)[2:])
+
+
+def crackme98():
+    name = 'walex'
+    serial = ''
+    hardcode1 = 'A1LSK2DJF4HGP3QWO5EIR6UTYZ8MXN7CBV9'
+    hardcode2 = 'SU7CSJKF09NCSDO9SDF09SDRLVK7809S4NF'
+    for i in name.upper():
+        index = hardcode1.find(i)
+        serial += hardcode2[index]
+    print(serial)
+crackme98()

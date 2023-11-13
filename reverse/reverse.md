@@ -3098,7 +3098,7 @@ def crackme94():
 
 ![image-20230920143404323](./reverse.assets/image-20230920143404323.png)
 
-另起一段：估摸着有一个月没更新crackme了，除了这一个月确实活多以外，这题的狗屎程度也是远超我的意料，虽然它并没有被收录在ede精选题库当中。应该从哪里开始说起呢，它的算法check长度总长0x4f6，包含了接近10个抽象的循环，且循环中夹杂了大量判断语句和许多不必要的变量增减，更很不幸的是这些都是绕不开的部分，你还真就得一行一行的给它看下来才行。就是由于这种混乱以及一开始对算法全貌的认知偏差，导致了解题流程的滞涩，但常言道福无双至祸不单行，还有个不幸的事在于你手欠把ollydebug一关：恭喜你之前做的注释和断点都没咯。好！下班！过两天：什么狗p代码，我之前看到哪了？很好，循环开始了。今天把工作做完，整出了一段完整的时间来再看这道题，发现算法整理出来还是很清晰的且并不复杂（竟然有特么的冒泡排序，真的逆天），那么作者和编译器的马最多只剩下一匹了（笑
+另起一段：估摸着有一个月没更新crackme了，除了这一个月确实活多以外，这题的狗屎程度也是远超我的意料，虽然它并没有被收录在ede精选题库当中。应该从哪里开始说起呢，它的算法check长度总长0x4f6，包含了接近10个抽象的循环，且循环中夹杂了大量判断语句和许多不必要的变量增减，更很不幸的是这些都是绕不开的部分，你还真就得一行一行的给它看下来才行。就是由于这种混乱以及一开始对算法全貌的认知偏差，导致了解题流程的滞涩，但常言道福无双至祸不单行，还有个不幸的事在于你手欠把ollydebug一关：恭喜你之前做的注释和断点都没咯。好！下班！过两天：什么狗p代码，我之前看到哪了？很好，循环开始了。今天把工作做完，整出了一段完整的时间来再看这道题，发现算法整理出来还是很清晰的且并不复杂（竟然有特么的冒泡排序，真的逆天），那么作者和编译器的马最多只剩下一匹了（笑（看了下log已经两个月了
 
 ![image-20231110174336658](./reverse.assets/image-20231110174336658.png)
 										图片名：20分钟前的我和现在的我
@@ -3182,6 +3182,68 @@ def crackme95():
         else:
             print('out of range!change your name!')
             return
+    print(serial)
+```
+
+
+
+## 096-xtFusion-k1
+
+easy
+
+![image-20231113164303127](./reverse.assets/image-20231113164303127.png)
+
+```python
+def crackme96():
+    name = 'walex'
+    local5 = 0x4D
+    local6 = 0x60FF58
+    local7 = 0x401220
+    local8 = 0x401220
+    for i in name:
+        edx = ord(i)
+        local5 = 80 * edx + local5
+        local6 = (local5 + local6) ^ 0x32
+        local7 = local6 * 4 + local7
+        local8 = local5 + local6 + local7
+    print(hex(local8)[2:])
+```
+
+
+
+## 097-fireworx.11
+
+猜测每次输入都会有一个验证
+
+有反调试，没解决，问问ede
+
+![image-20231113165137712](./reverse.assets/image-20231113165137712.png)
+
+
+
+## 098-DueList.4
+
+在`intermodular calls`给`SendDlgItemMessageA`断点拉满，应该是在这个位置
+
+![image-20231113174458522](./reverse.assets/image-20231113174458522.png)
+
+有两串字符串，在第一串之前 输入的小写字母会被处理成大写。看起来像是第一次找索引，根据第二次映射的架势。
+
+![image-20231113180317752](./reverse.assets/image-20231113180317752.png)
+
+确实
+
+![image-20231113180648159](./reverse.assets/image-20231113180648159.png)
+
+```python
+def crackme98():
+    name = 'walex'
+    serial = ''
+    hardcode1 = 'A1LSK2DJF4HGP3QWO5EIR6UTYZ8MXN7CBV9'
+    hardcode2 = 'SU7CSJKF09NCSDO9SDF09SDRLVK7809S4NF'
+    for i in name.upper():
+        index = hardcode1.find(i)
+        serial += hardcode2[index]
     print(serial)
 ```
 
