@@ -1389,4 +1389,40 @@ def crackme98():
         index = hardcode1.find(i)
         serial += hardcode2[index]
     print(serial)
-crackme98()
+
+
+def crackme99():
+    name = 'fasseded'
+    serial = '12345678'
+    esi = len(name)
+    ebx = len(serial)
+    result_list = []
+    for i in range(0, esi):
+        edx = ord(name[i])
+        edx ^= i
+        ecx = ebx
+        ecx ^= i
+        edx += ecx
+        result_list.append(edx)
+        print(edx)
+        # 好像是会把小于0x20 大于0x80的归一化，略
+    result_str = ''
+    for i in result_list:
+        result_str += chr(i)
+    # 由于程序里比对的顺序是反的，所以这里也得反一下
+    print(result_str[::-1])
+
+
+def crackme100():
+    serial = ''
+    machine_code = 0
+    magic_code1 = 0x4B4EB28
+    magic_code2 = 0x22F16632
+    magic_code3 = 0x2CF062E0
+    magic_code4 = 0x6C21D6B
+    serial += str(magic_code1 ^ machine_code)[1:5]
+    serial += str(magic_code2 ^ machine_code)[1:5]
+    serial += str(magic_code3 ^ machine_code)[1:5]
+    serial += str(magic_code4 ^ machine_code)[1:5]
+    print(serial)
+crackme100()

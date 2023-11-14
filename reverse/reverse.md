@@ -3247,3 +3247,65 @@ def crackme98():
     print(serial)
 ```
 
+
+
+## 099-figugegl.2b
+
+利用`GetDlgItemTextA`定位，注意顺序算出serial需要倒序一遍。
+
+![image-20231114114428056](./reverse.assets/image-20231114114428056.png)
+
+```python
+def crackme99():
+    name = 'fasseded'
+    serial = '12345678'
+    esi = len(name)
+    ebx = len(serial)
+    result_list = []
+    for i in range(0, esi):
+        edx = ord(name[i])
+        edx ^= i
+        ecx = ebx
+        ecx ^= i
+        edx += ecx
+        result_list.append(edx)
+        print(edx)
+        # 好像是会把小于0x20 大于0x80的归一化，略
+    result_str = ''
+    for i in result_list:
+        result_str += chr(i)
+    # 由于程序里比对的顺序是反的，所以这里也得反一下
+    print(result_str[::-1])
+```
+
+
+
+## 100-E-crackme
+
+不知道该说是有意思还是说见到鬼了，所有call在点击注册的时候都没断下来。
+
+![image-20231114134921223](./reverse.assets/image-20231114134921223.png)
+
+根据暂停法找到了调用的地方，底下那个krnln搜索为E语言登录的必须插件。
+
+![image-20231114140938804](./reverse.assets/image-20231114140938804.png)
+
+![image-20231114141316074](./reverse.assets/image-20231114141316074.png)
+
+看起来像是四个位置有硬编码
+
+![image-20231114142712217](./reverse.assets/image-20231114142712217.png)
+
+![image-20231114142654700](./reverse.assets/image-20231114142654700.png)
+
+还真是。
+
+![image-20231114142911109](./reverse.assets/image-20231114142911109.png)
+
+但是从ede在评论区留下的算法来看，我有些东西漏掉了。那思路就是：我从这些地址里取到的数是对的，但是我没注意到的点应该在"它们是如何被写进去的"这一步骤中，并且这个代码段中有个call我没细读作用存疑，估计就和这个有关。
+
+![image-20231114150520886](./reverse.assets/image-20231114150520886.png)
+
+机器码的由来是追明白了，但找了半天没找到ede代码里的异或部分。md没想到要往下追两个函数才能看到。
+
+![image-20231114163632130](./reverse.assets/image-20231114163632130.png)
