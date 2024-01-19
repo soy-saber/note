@@ -1425,4 +1425,39 @@ def crackme100():
     serial += str(magic_code3 ^ machine_code)[1:5]
     serial += str(magic_code4 ^ machine_code)[1:5]
     print(serial)
-crackme100()
+
+
+def crackme101():
+    # 0xA 0x31-0x39
+    # ww-1w393w011
+    print(0x48 ^ 0xC)
+    hardcode = {2: 0x2D, 3: 0x31, 5: 0x33, 6: 0x39, 7: 0x33, 9: 0x30, 0xA: 0x31, 0xB: 0x31}
+    # 1,4,8位 + 用户名长为0xAB 171
+    code = 'x5-153935011'
+    ebx = 0x401115
+    for i in code:
+        value = ord(i)
+        ah = value % 2
+        if not ah:
+            ebx += 0x100
+    edx = len(code)
+    ebx <<= 0x8
+    index = 0x1
+    cl = 0x2
+    while index < len(code):
+        bl = ord(code[index])
+        edx += bl
+        cl += 1
+        index += cl
+    for i in hardcode.keys():
+        code = code[:i] + chr(hardcode[i]) + code[i+1:]
+    print(code)
+
+
+
+
+
+
+
+
+crackme101()

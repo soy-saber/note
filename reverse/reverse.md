@@ -3309,3 +3309,90 @@ def crackme99():
 机器码的由来是追明白了，但找了半天没找到ede代码里的异或部分。md没想到要往下追两个函数才能看到。
 
 ![image-20231114163632130](./reverse.assets/image-20231114163632130.png)
+
+```python
+def crackme100():
+    serial = ''
+    machine_code = 0
+    magic_code1 = 0x4B4EB28
+    magic_code2 = 0x22F16632
+    magic_code3 = 0x2CF062E0
+    magic_code4 = 0x6C21D6B
+    serial += str(magic_code1 ^ machine_code)[1:5]
+    serial += str(magic_code2 ^ machine_code)[1:5]
+    serial += str(magic_code3 ^ machine_code)[1:5]
+    serial += str(magic_code4 ^ machine_code)[1:5]
+    print(serial)
+```
+
+
+
+## 101-serialme-byToShimi
+
+脱完壳莫名其妙寄了，乐。
+
+不脱壳硬整，搜字符串发现正好有个Get函数在下面，断点能断到
+
+![image-20231124175010754](./reverse.assets/image-20231124175010754.png)
+
+变形部分很简单，但最后check部分搞出来很多限制条件，需要倒推。
+
+![image-20240108103732209](./reverse.assets/image-20240108103732209.png)
+
+![image-20240108103637344](./reverse.assets/image-20240108103637344.png)
+
+细看了一下发现wrong call里面还有变形，不是简单的call，好烦人。有个比较困扰的点在于，目前不确定正确的response是在什么位置被读进去的，因此没有正确的serial思路。
+
+上面全部去掉，思路完全错误，4013D9并非wrong call，导致整个想法都出现了偏差。掉头重看一遍发现4013D9这个函数是肯定要进的，只是dl=0xAB时会先进40145D
+
+![image-20240119095329995](./reverse.assets/image-20240119095329995.png)
+
+这个函数最终的影响就是把ecx寄存器归零了。
+
+![image-20240119095302334](./reverse.assets/image-20240119095302334.png)
+
+再看4013D9里面就很乐了，第一反应就是搁那拼字符串，根据ecx的值决定拼不拼in。
+
+![image-20240119095903410](./reverse.assets/image-20240119095903410.png)
+
+de完了差不多是这个意思，但有个很他妈奇怪的check，要dh ^ 0xC为0x48，但这个dh的来源是401115的末两位，我甚至没找到修改的地方，难顶。![image-20240119111543009](./reverse.assets/image-20240119111543009.png)
+
+![image-20240119111510941](./reverse.assets/image-20240119111510941.png)
+
+你不能想象我是用什么表情看完这段话的（摸头流汗黄豆
+
+![image-20240119111953368](./reverse.assets/image-20240119111953368.png)
+
+![image-20240119111943294](./reverse.assets/image-20240119111943294.png)
+
+草了
+
+```python
+# 一个并不注册机的注册机
+def crackme101():
+    # 0xA 0x31-0x39
+    # ww-1w393w011
+    print(0x48 ^ 0xC)
+    hardcode = {2: 0x2D, 3: 0x31, 5: 0x33, 6: 0x39, 7: 0x33, 9: 0x30, 0xA: 0x31, 0xB: 0x31}
+    # 1,4,8位 + 用户名长为0xAB 171
+    code = 'x5-153935011'
+    ebx = 0x401115
+    for i in code:
+        value = ord(i)
+        ah = value % 2
+        if not ah:
+            ebx += 0x100
+    edx = len(code)
+    ebx <<= 0x8
+    index = 0x1
+    cl = 0x2
+    while index < len(code):
+        bl = ord(code[index])
+        edx += bl
+        cl += 1
+        index += cl
+    for i in hardcode.keys():
+        code = code[:i] + chr(hardcode[i]) + code[i+1:]
+    print(code)
+```
+
