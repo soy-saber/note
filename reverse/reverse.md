@@ -3396,3 +3396,80 @@ def crackme101():
     print(code)
 ```
 
+
+
+## 102-haggar-keyme1
+
+算法部分好像不难，但是手动de着de着的时候老是进奇怪的死循环，在特定位置下了断之后位置会直接结束在ntdll领空中，应该是有反调试，摸了。
+
+```python
+def crackme102():
+    origin_str = '11111-11111-11111-11111-11111'
+    base = 0x4031D0
+    Word_2D = [0x4031D5, 0x4031DB, 0x4031E1, 0x4031E7]
+    for pos in Word_2D:
+        print(pos - base + 1)
+```
+
+
+
+## 103-cyT0m-crackme#2
+
+久违的keyfile文件，要脱壳。
+
+发现存在三种reponse：key文件无效、key文件有效但错误、key文件正确，一直是无效的response，判断条件与这个位置读出来的eax有关。看了眼有个长0xFF的s字符串会打印在页面上，那么文件里估计会出现00进行一个截断。
+
+![image-20240122165637466](./reverse.assets/image-20240122165637466.png)
+
+但在18F773下了断点之后发现中间也没有可以插手eax的地方，怪事。
+
+![image-20240122165824039](./reverse.assets/image-20240122165824039.png)
+
+看了眼视频，得，上面还有写eax的地方，疏忽了。
+
+这题切入点非常的精巧，当读到00字符时会有一个跳转，但常规的字符串尾的跳转在0x42662F，而不是我们想要的0x42661B，因此要在文件中手写00，和一开始的猜测对上了。怪不得这个循环看起来很怪。
+
+![image-20240123095442878](./reverse.assets/image-20240123095442878.png)
+
+跳转后才能到控制eax值的地方。
+
+![image-20240123095552240](./reverse.assets/image-20240123095552240.png)
+
+```python
+def crackme103():
+    name = 'walex'
+    eax = 1
+    for i in name:
+        bl = ord(i)
+        eax = (eax * bl) & 0xFFFFFFFF
+        eax ^= 0x63546D32
+        print(hex(eax))
+    eax >>= 1
+    serial = ''
+    for i in range(len(hex(eax))-2, 1, -2):
+        serial += hex(eax)[i:i+2]
+    print(serial)
+```
+
+
+
+## 104-kaizer-crackme3
+
+简单看了一遍，简单！看起来就一个name->serial的变形，再拼了一堆乱七八糟的字符串。
+
+![image-20240123102842326](./reverse.assets/image-20240123102842326.png)
+
+```python
+def crackme104():
+    hardcode1 = '668r9\\5233'
+    hardcode2 = '-'
+    hardcode3 = 'k329[43}'
+    name = 'walex'
+    esi = len(name)
+    edi = esi * 0x75 + 0x153E - 0x1574
+    eax = (esi - 0x22) * 0x11F0
+    edi = edi + eax + 0xE524C
+    serial = hardcode1 + str(edi) + hardcode2 + hardcode3 + hex(ord(name[0]))[2:] + '$'
+    print(serial)
+```
+

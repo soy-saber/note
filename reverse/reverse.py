@@ -1454,10 +1454,39 @@ def crackme101():
     print(code)
 
 
+def crackme102():
+    origin_str = '11111-11111-11111-11111-11111'
+    base = 0x4031D0
+    Word_2D = [0x4031D5, 0x4031DB, 0x4031E1, 0x4031E7]
+    for pos in Word_2D:
+        print(pos - base + 1)
 
 
+def crackme103():
+    name = 'walex'
+    eax = 1
+    for i in name:
+        bl = ord(i)
+        eax = (eax * bl) & 0xFFFFFFFF
+        eax ^= 0x63546D32
+        print(hex(eax))
+    eax >>= 1
+    serial = ''
+    for i in range(len(hex(eax))-2, 1, -2):
+        serial += hex(eax)[i:i+2]
+    print(serial)
 
 
+def crackme104():
+    hardcode1 = '668r9\\5233'
+    hardcode2 = '-'
+    hardcode3 = 'k329[43}'
+    name = 'fatestede'
+    esi = len(name)
+    edi = esi * 0x75 + 0x153E - 0x1574
+    eax = (esi - 0x22) * 0x11F0
+    edi = edi + eax + 0xE524C
+    serial = hardcode1 + str(edi) + hardcode2 + hardcode3 + hex(ord(name[0]))[2:] + '$'
+    print(serial)
 
-
-crackme101()
+crackme104()
