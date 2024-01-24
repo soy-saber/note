@@ -3473,3 +3473,69 @@ def crackme104():
     print(serial)
 ```
 
+
+
+## 105-royalaccezzcrackme
+
+有点长，不算难，很恶心，感受一下恐惧（摸头流汗黄豆
+
+![image-20240124105631911](./reverse.assets/image-20240124105631911.png)
+
+竟然还有三元一次方程，笑死了
+
+![image-20240124110819972](./reverse.assets/image-20240124110819972.png)
+
+![image-20240124110833436](./reverse.assets/image-20240124110833436.png)
+
+哈哈，作者你很幽默
+
+![image-20240124114204301](./reverse.assets/image-20240124114204301.png)
+
+```python
+def crackme105():
+    pos_4030C4 = 0
+    name = 'walex'
+    ebx = 0x1
+    for i in range(len(name)-1, -1, -1):
+        edx = ord(name[i])
+        edx ^= ebx
+        edx *= ebx
+        ebx += 5
+        pos_4030C4 ^= edx
+        for j in range(0, 5):
+            pos_4030C4 = rol(pos_4030C4)
+    pos_4030C4 = 0xFFFFFFFF - pos_4030C4
+    for i in name:
+        pos_4030C4 = ror(pos_4030C4)
+    print(hex(pos_4030C4))
+    ebx = pos_4030C4
+    list_serial_front = []
+    while ebx != 0:
+        edx = (ebx % 0x1A) + 0x41
+        ebx = (ebx - ebx % 0x1A) // 0x1A
+        list_serial_front.append(edx)
+    str_serial = ''
+    for i in range(len(list_serial_front) - 1, -1, -1):
+        str_serial = chr(list_serial_front[i]) + str_serial
+    print(str_serial)
+    str_serial += '-'
+    pos_4030C9 = 1
+    pos_4030CA = 2
+    pos_4030CB = 3
+    # 蚌埠住了，三元一次方程来了
+    pos_4030CC = pos_4030C9 * 3 - pos_4030CA + pos_4030CB * 5
+    pos_4030D0 = -pos_4030C9 * 7 + pos_4030CA * 2 + pos_4030CB * 7
+    pos_4030D4 = pos_4030C9 + pos_4030CA - pos_4030CB * 2
+    from sympy import symbols, Eq, solve
+    x, y, z = symbols('x,y,z')
+    eq1 = Eq((3 * x - y + z * 5), 0x204)
+    eq2 = Eq((-7 * x + 2 * y + 7 * z), 0x19)
+    eq3 = Eq((x + y - 2 * z), 0xD)
+    ans = (solve((eq1, eq2, eq3), (x, y, z)))
+    print(ans)
+    for i in ans.keys():
+        str_serial += chr(ans[i])
+    print(str_serial)
+
+```
+
