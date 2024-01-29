@@ -3539,3 +3539,78 @@ def crackme105():
 
 ```
 
+
+
+## 106-crackme_0018
+
+反调试，过段时间得想想办法，这遇见反调试就寄不是个办法。视频里甚至没有碰到这个问题。
+
+看了下也没有isdebuggerpresent加载
+
+![image-20240124151429497](./reverse.assets/image-20240124151429497.png)
+
+全局搜索isdebuggerpresent下断，断下来发现确实有调用，但又不在主函数里。
+
+![image-20240124151837930](./reverse.assets/image-20240124151837930.png)
+
+然后我试了半天啥都没改，突然在这正常断下来了，给我整不会了。
+
+![image-20240124160401548](./reverse.assets/image-20240124160401548.png)
+
+我又重新载入程序，把断点清完，然后打上最开始的那个断点，发现断下来了。
+
+？
+
+玩我？
+
+程序本身倒是很简单。
+
+![image-20240126165257031](./reverse.assets/image-20240126165257031.png)
+
+```python
+def crackme106():
+    serial = 'wwalex'
+    serial = serial.upper()
+    name = ''
+    for i in range(0, len(serial), 2):
+        cl = ord(serial[i+1])
+        al = ord(serial[i])
+        al -= 0x41
+        cl -= 0x41
+        esi = cl
+        cl = al
+        ebx = 0x1A
+        edx = cl * 9
+        eax = edx + 2 * esi
+        edx = eax % ebx
+        eax //= ebx
+        name += chr(edx + 0x41)
+        eax = 3 * esi
+        cl += 4 * eax
+        eax += cl
+        edx = eax % ebx
+        name += chr(edx + 0x41)
+    print(name)
+```
+
+
+
+## 107-s_crackme
+
+普通。其实算是道硬编码的题目。
+
+![image-20240129142703117](./reverse.assets/image-20240129142703117.png)
+
+```python
+def crackme107():
+    hardcode1 = 'qwgboy2000'
+    hardcode2 = 'PVFANX'
+    hardcode3 = 'cool'
+    serial = ''
+    serial += hardcode1
+    for i in range(0, len(hardcode2)):
+        serial += chr(ord(hardcode1[i]) - ord(hardcode2[i]))
+    serial += hardcode3
+    print(serial)
+```
+

@@ -1544,4 +1544,41 @@ def crackme105():
     print(str_serial)
 
 
-crackme105()
+def crackme106():
+    serial = 'wwalex'
+    serial = serial.upper()
+    name = ''
+    for i in range(0, len(serial), 2):
+        cl = ord(serial[i+1])
+        al = ord(serial[i])
+        al -= 0x41
+        cl -= 0x41
+        esi = cl
+        cl = al
+        ebx = 0x1A
+        edx = cl * 9
+        eax = edx + 2 * esi
+        edx = eax % ebx
+        eax //= ebx
+        name += chr(edx + 0x41)
+        eax = 3 * esi
+        cl += 4 * eax
+        eax += cl
+        edx = eax % ebx
+        name += chr(edx + 0x41)
+    print(name)
+
+
+def crackme107():
+    hardcode1 = 'qwgboy2000'
+    hardcode2 = 'PVFANX'
+    hardcode3 = 'cool'
+    serial = ''
+    serial += hardcode1
+    for i in range(0, len(hardcode2)):
+        serial += chr(ord(hardcode1[i]) - ord(hardcode2[i]))
+    serial += hardcode3
+    print(serial)
+
+
+crackme107()
