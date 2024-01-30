@@ -3614,3 +3614,47 @@ def crackme107():
     print(serial)
 ```
 
+
+
+## 108-Aboo Me - kiTo~SCA
+
+又有字符串，又是lstrcmp，我先放一个简单在这里。
+
+雀氏。
+
+![image-20240130144740792](./reverse.assets/image-20240130144740792.png)
+
+```python
+def crackme108():
+    name = 'walex'
+    hardcode = [0x13, 0x16, 0x99, 0x11, 0x63, 0x15, 0x54, 0x52, 0x88, 0x01, 0x31, 0x56, 0x68, 0x55, 0x37]
+    local1 = 0
+    for i in range(0, len(name)):
+        ecx = ord(name[i])
+        eax = hardcode[i+1] + local1
+        eax += ecx
+        local1 = eax
+        edx = ecx * 0xA
+        eax = local1
+        eax += edx
+        local1 = eax
+    print(hex(local1))
+    local2 = 0
+    for i in range(0, len(name)):
+        ecx = hardcode[i] * 0xA
+        edx = local2
+        edx += ecx
+        local2 = edx
+        eax = ord(name[2])
+        edx = hardcode[i]
+        edx += local2
+        edx += eax
+        edx += 0x31337
+        local2 = edx
+    print(hex(local2))
+    serial1 = '-aboo-me-'
+    serial2 = '-SCA'
+    serial = hex(local1)[2:].upper() + serial1 + hex(local2)[2:].upper() + str(local2) + serial2
+    print(serial)
+```
+

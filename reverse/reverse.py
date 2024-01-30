@@ -1581,4 +1581,37 @@ def crackme107():
     print(serial)
 
 
-crackme107()
+def crackme108():
+    name = 'fatestede'
+    hardcode = [0x13, 0x16, 0x99, 0x11, 0x63, 0x15, 0x54, 0x52, 0x88, 0x01, 0x31, 0x56, 0x68, 0x55, 0x37]
+    local1 = 0
+    for i in range(0, len(name)):
+        ecx = ord(name[i])
+        eax = hardcode[i+1] + local1
+        eax += ecx
+        local1 = eax
+        edx = ecx * 0xA
+        eax = local1
+        eax += edx
+        local1 = eax
+    print(hex(local1))
+    local2 = 0
+    for i in range(0, len(name)):
+        ecx = hardcode[i] * 0xA
+        edx = local2
+        edx += ecx
+        local2 = edx
+        eax = ord(name[2])
+        edx = hardcode[i]
+        edx += local2
+        edx += eax
+        edx += 0x31337
+        local2 = edx
+    print(hex(local2))
+    serial1 = '-aboo-me-'
+    serial2 = '-SCA'
+    serial = hex(local1)[2:].upper() + serial1 + hex(local2)[2:].upper() + str(local2) + serial2
+    print(serial)
+
+
+crackme108()
