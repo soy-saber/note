@@ -1614,4 +1614,43 @@ def crackme108():
     print(serial)
 
 
-crackme108()
+def crackme109():
+    name = 'walex'
+    esi = 0
+    ebx = 0
+    for i in range(0, 2):
+        edx = esi ^ 0x2
+        ebx = ord(name[edx])
+        eax = ord(name[edx-1])
+        ebx |= eax
+        ebx += len(name)
+        esi += 1
+    print(ebx)
+
+
+def crackme110():
+    # 0x1D5
+    serial1 = 'WALEXT'
+    # 0x1B2
+    serial2 = 'WALEX1'
+    serial = serial1
+    name = 'alex'
+    for i in range(0, len(name)):
+        serial += chr(ord(serial1[i]) ^ ord(name[i]))
+    serial += serial2
+    print(serial)
+
+
+def crackme111():
+    name = 'walex'
+    name = name.upper()
+    di = 0
+    ax = 0
+    for i in name:
+        ax = ord(i) - 0x40
+        ax *= 0x82
+        ax += di
+        ax += 16 * 0x50
+        di = ax
+    print(ax)
+crackme111()

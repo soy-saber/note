@@ -3658,3 +3658,73 @@ def crackme108():
     print(serial)
 ```
 
+
+
+## 109-Jony-crackme
+
+![image-20240130164642707](./reverse.assets/image-20240130164642707.png)
+
+```python
+def crackme109():
+    name = 'walex'
+    esi = 0
+    for i in range(0, 2):
+        edx = esi ^ 0x2
+        ebx = ord(name[edx])
+        eax = ord(name[edx-1])
+        ebx |= eax
+        ebx += len(name)
+        esi += 1
+    print(ebx)
+```
+
+
+
+## 110-DueList.2
+
+![image-20240131162220250](./reverse.assets/image-20240131162220250.png)
+
+![image-20240131162231901](./reverse.assets/image-20240131162231901.png)
+
+```python
+def crackme110():
+    # 第一个01前的和为0x1D5
+    serial1 = 'WALEXT'
+    # 第二个01后的和为0x1B2
+    serial2 = 'WALEX1'
+    serial = serial1
+    name = 'alex'
+    # 中间异或
+    for i in range(0, len(name)):
+        serial += chr(ord(serial1[i]) ^ ord(name[i]))
+    serial += serial2
+    print(serial)
+```
+
+
+
+## 111-execution
+
+猜猜这是什么语言？没错，真聪明，哈哈，草。
+
+![image-20240131162502099](./reverse.assets/image-20240131162502099.png)
+
+很快啊，我一个偷袭，它一个老年crackme没有防住。
+
+![image-20240131164230284](./reverse.assets/image-20240131164230284.png)
+
+```python
+def crackme111():
+    name = 'walex'
+    name = name.upper()
+    di = 0
+    ax = 0
+    for i in name:
+        ax = ord(i) - 0x40
+        ax *= 0x82
+        ax += di
+        ax += 16 * 0x50
+        di = ax
+    print(ax)
+```
+
