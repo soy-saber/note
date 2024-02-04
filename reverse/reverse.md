@@ -3728,3 +3728,37 @@ def crackme111():
     print(ax)
 ```
 
+
+
+## 112-cracking4all.2
+
+才出狼窝，又入虎穴，怎么还是vb。
+
+很好，call了半天我没搞清楚它lea的地址到底在哪。
+
+看了半天发现，它居然每拼一次的位置都在变
+
+![image-20240131175358091](./reverse.assets/image-20240131175358091.png)
+
+![image-20240131175440808](./reverse.assets/image-20240131175440808.png)
+
+![image-20240131175520310](./reverse.assets/image-20240131175520310.png)
+
+没办法，vb是这样的，一点点看吧。总的来说是以下流程：
+
+1、先读出一个固定位置的字符(第四位)获取其ascii码值，和输入的每个serial字符异或，通过varcat保存异或后的字符。
+
+2、对异或后的字符串再进行一波操作，得出结果。妈个鸡，真有点难看吧。
+
+3、结果和字符串`VeiajeEjbavwij`compare，一致则通过，因此输入字符数量为14。
+
+![image-20240204162416108](./reverse.assets/image-20240204162416108.png)
+
+![image-20240204162556174](./reverse.assets/image-20240204162556174.png)
+
+
+
+
+
+## 113-Colormaster
+

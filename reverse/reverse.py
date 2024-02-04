@@ -1653,4 +1653,16 @@ def crackme111():
         ax += 16 * 0x50
         di = ax
     print(ax)
-crackme111()
+
+
+def crackme112():
+    serial = '12345678901234'
+    serial1 = ''
+    for i in serial:
+        serial1 += str(ord('4') ^ ord(i))
+    print(serial1)
+
+
+def crackme113():
+    
+crackme112()
