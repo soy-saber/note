@@ -1243,9 +1243,9 @@ def crackme40():
 
 ![image-20230609103139402](./reverse.assets/image-20230609103139402.png)
 
-发现好像四个框的数都写到了内存的同一个位置，我以为会写在四个位置保存再做验证。
+发现好像四个框的数都写到了内存的同一个位置，我以为会写在四个位置保存再做验证。 
 
- ![image-20230609102937585](./reverse.assets/image-20230609102937585.png)
+![image-20230609102937585](./reverse.assets/image-20230609102937585.png)
 
 因此在这个位置打了断点，查看后续调用，如下
 
@@ -1263,7 +1263,7 @@ def crackme40():
 
 ![image-20230609122839430](./reverse.assets/image-20230609122839430.png)  
 
-```
+```python
 def crackme41():
     name = 'wa1ex'
     for i in range(0, 5):
@@ -3756,9 +3756,248 @@ def crackme111():
 
 ![image-20240204162556174](./reverse.assets/image-20240204162556174.png)
 
-
+估摸着用vb decompiler看起来方便点，摆。
 
 
 
 ## 113-Colormaster
+
+不想做vb。甚至懒得骂了。
+
+
+
+## 114-Eternal Bliss.9sh
+
+首先，怎么又是vb。
+
+其次，为啥name和code写不进去，只能点个register？？
+
+![image-20240205102413138](./reverse.assets/image-20240205102413138.png)
+
+爬！
+
+
+
+## 115-bjanes.2
+
+连四题vb也是有点东西的。
+
+
+
+## 116-REM-KeyGenME#10
+
+脱壳脱出问题了，算了，带壳de吧。
+
+![image-20240205103505826](./reverse.assets/image-20240205103505826.png)
+
+刚开始以为修改内存会报debug detected，结果发现这玩意。还挺幽默。
+
+![image-20240205134408391](./reverse.assets/image-20240205134408391.png)
+
+发现是我读代码的问题，没认真看以为这里的jnz和cmp存在关联，实际上和最后jnz有关的就是test eax，eax这句。原始思路一定程度上给我带偏了，小无语。
+
+![image-20240205134848417](./reverse.assets/image-20240205134848417.png)
+
+![image-20240205134720162](./reverse.assets/image-20240205134720162.png)
+
+```python
+def crackme116():
+    serial = 123456
+    pos_40625F = serial
+    name = 'walexw'
+    ecx = 0
+    for i in name:
+        al = ord(i)
+        ecx += al
+        for j in range(0, 8):
+            ecx = rol(ecx)
+    ecx ^= 0x2
+    ecx -= 0x50
+    ecx ^= 0x1337
+    si = 0x07E8
+    # 这个位置可能会溢出
+    ecx += si
+    print(ecx)
+```
+
+
+
+## 117-delphi-crackme
+
+用户名首字母ascii码值转字符串+用户名长度
+
+![image-20240205141540275](./reverse.assets/image-20240205141540275.png)
+
+```python
+def crackme117():
+    name = 'walex'
+    eax = ord(name[0])
+    eax ^= 0xE
+    print(str(eax)+str(len(name)))
+```
+
+
+
+## 118-[v0!d]crackme
+
+中间的流程有点长。好在逻辑很简单，只是看着长。
+
+![image-20240205151033567](./reverse.assets/image-20240205151033567.png)
+
+```python
+def crackme118():
+    ebp = 0
+    name = 'fatestede'
+    serial = name[0] + '-' + name[-1].upper()
+    for i in name:
+        ecx = ord(i)
+        ebp += ecx
+    ebp += 0x6064
+    print(ebp)
+    serial = serial + str(ebp) + '-'
+    ebp += 0x6064
+    print(ebp)
+    serial = serial + str(ebp)
+    print(serial)
+```
+
+
+
+## 119-BBG-crackme3
+
+好像是对了，但中间有很多看起来很有道理，但实际上没啥用的东西。比如那个hardcode字符串，没看明白。
+
+![image-20240205154058461](./reverse.assets/image-20240205154058461.png)
+
+![image-20240205154121339](./reverse.assets/image-20240205154121339.png)
+
+![image-20240205173442574](./reverse.assets/image-20240205173442574.png)
+
+```python
+def crackme119():
+    name = 'walex1'
+    pos_448830 = 0
+    total = 0
+    hardcode = 'p:\\4.Nulaei tmc!'
+    index = [15, 2, 3, 13, 14, 1, 4, 13, 14, 1]
+    for i in index:
+        total += ord(hardcode[i-1])
+    for i in name:
+        pos_448830 += ord(i)
+    pos_448830 = pos_448830 + 0xA + 0xD
+    eax = pos_448830
+    eax += 0x246
+    pos_448834 = eax
+    eax >>= 1
+    pos_448838 = eax
+    pos_44883C = eax * eax
+    pos_448840 = pos_44883C - 0x1E5B
+    print(hex(pos_448830))
+    print(hex(pos_448834))
+    print(hex(pos_448838))
+    print(hex(pos_44883C))
+    print(hex(pos_448840))
+    print(pos_448840)
+```
+
+
+
+## 120-bxm_crackme1
+
+总之不是解压到system32目录下。
+
+题目不难，但是因为涉及到负数运算，导致写注册机的时候搞符号位很抽象。而且我的注册机写复杂了，根本不需要搞遍历，实际上两个方程的未知数是等价的，直接算就好。
+
+![image-20240206105424974](./reverse.assets/image-20240206105424974.png)
+
+```python
+def crackme120():
+    eax = 0
+    name = 'walex'
+    local6 = len(name)
+    for i in name:
+        eax += ord(i)
+    ecx = -eax
+    edx = eax + len(name)
+    # 这里如果按位与会把符号位的1保存下来
+    local3 = ecx * edx
+    serial = 0
+    while True:
+        local4 = - serial
+        edx = local4 * local4
+        eax = local4 * local6
+        if edx + eax + local3 == 0:
+            # 550
+            print('answer is: ' + str(serial))
+            return
+        serial += 1
+```
+
+
+
+## 121-bRaINbuSY-crackme1
+
+EZ。
+
+![image-20240206112703907](./reverse.assets/image-20240206112703907.png)
+
+```python
+def crackme121():
+    name = 'walex'
+    pos_45B844 = 0
+    for i in name:
+        edx = ord(i)
+        edx = ((edx << 3) & 0xFFFFFFFF)
+        pos_45B844 += edx
+    eax = (len(name) << 0x3)
+    pos_45B844 += eax
+    eax = pos_45B844 << 0x2
+    print(eax)
+```
+
+
+
+
+
+## 122-DFCG-crackme
+
+三次变换得到三部分序列号，结构清晰。
+
+![image-20240219103809446](./reverse.assets/image-20240219103809446.png)
+
+```python
+def calc122(num):
+    if num >= 2 ** 31:
+        return 0xFFFFFFFF - num + 1
+    else:
+        return num
+
+def crackme122():
+    name = 'walex'
+    serial = ''
+    name_len = len(name)
+    ebx = 0
+    for i in range(0, name_len):
+        ecx = (name_len * 0x21C6918E)
+        ebx = ebx + ecx
+        ecx = ord(name[i]) * 0x2CE
+        ebx = ebx + ecx
+    ebx &= 0xFFFFFFFF
+    serial += str(calc122(ebx)) + '-'
+
+    for i in range(0, name_len):
+        ecx = ord(name[i])
+        ecx = ecx * 0x21C6918E * 0x7BC
+        ebx = ebx + ecx - name_len
+    ebx &= 0xFFFFFFFF
+    serial += str(calc122(ebx)) + '-'
+
+    for i in range(0, name_len):
+        ecx = ord(name[i])
+        ecx = ecx * name_len * 0x4C6
+        ebx = ebx + ecx + name_len
+    ebx = (ebx + 0x21C6918E) & 0xFFFFFFFF
+    serial += str(calc122(ebx))
+    print(serial)
+```
 

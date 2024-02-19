@@ -1664,5 +1664,141 @@ def crackme112():
 
 
 def crackme113():
-    
-crackme112()
+    return
+
+def crackme116():
+    name = 'walexw'
+    ecx = 0
+    for i in name:
+        al = ord(i)
+        ecx += al
+        for j in range(0, 8):
+            ecx = rol(ecx)
+    ecx ^= 0x2
+    ecx -= 0x50
+    ecx ^= 0x1337
+    si = 0x07E8
+    # 这个位置可能会溢出
+    ecx += si
+    print(ecx)
+
+
+def crackme117():
+    name = 'walex'
+    eax = ord(name[0])
+    eax ^= 0xE
+    print(str(eax)+str(len(name)))
+
+
+def crackme118():
+    ebp = 0
+    name = 'fatestede'
+    serial = name[0] + '-' + name[-1].upper()
+    for i in name:
+        ecx = ord(i)
+        ebp += ecx
+    ebp += 0x6064
+    print(ebp)
+    serial = serial + str(ebp) + '-'
+    ebp += 0x6064
+    print(ebp)
+    serial = serial + str(ebp)
+    print(serial)
+
+
+def crackme119():
+    name = 'walex1'
+    pos_448830 = 0
+    total = 0
+    hardcode = 'p:\\4.Nulaei tmc!'
+    index = [15, 2, 3, 13, 14, 1, 4, 13, 14, 1]
+    for i in index:
+        total += ord(hardcode[i-1])
+    for i in name:
+        pos_448830 += ord(i)
+    pos_448830 = pos_448830 + 0xA + 0xD
+    eax = pos_448830
+    eax += 0x246
+    pos_448834 = eax
+    eax >>= 1
+    pos_448838 = eax
+    pos_44883C = eax * eax
+    pos_448840 = pos_44883C - 0x1E5B
+    print(hex(pos_448830))
+    print(hex(pos_448834))
+    print(hex(pos_448838))
+    print(hex(pos_44883C))
+    print(hex(pos_448840))
+    print(pos_448840)
+
+
+def crackme120():
+    eax = 0
+    name = 'walex'
+    local6 = len(name)
+    for i in name:
+        eax += ord(i)
+    ecx = -eax
+    edx = eax + len(name)
+    # 这里如果按位与会把符号位的1保存下来
+    local3 = ecx * edx
+    serial = 0
+    while True:
+        local4 = - serial
+        edx = local4 * local4
+        eax = local4 * local6
+        if edx + eax + local3 == 0:
+            # 550
+            print('answer is: ' + str(serial))
+            return
+        serial += 1
+
+
+def crackme121():
+    name = 'walex'
+    pos_45B844 = 0
+    for i in name:
+        edx = ord(i)
+        edx = ((edx << 3) & 0xFFFFFFFF)
+        pos_45B844 += edx
+    eax = (len(name) << 0x3)
+    pos_45B844 += eax
+    eax = pos_45B844 << 0x2
+    print(eax)
+
+
+def calc122(num):
+    if num >= 2 ** 31:
+        return 0xFFFFFFFF - num + 1
+    else:
+        return num
+
+def crackme122():
+    name = 'walex'
+    serial = ''
+    name_len = len(name)
+    ebx = 0
+    for i in range(0, name_len):
+        ecx = (name_len * 0x21C6918E)
+        ebx = ebx + ecx
+        ecx = ord(name[i]) * 0x2CE
+        ebx = ebx + ecx
+    ebx &= 0xFFFFFFFF
+    serial += str(calc122(ebx)) + '-'
+
+    for i in range(0, name_len):
+        ecx = ord(name[i])
+        ecx = ecx * 0x21C6918E * 0x7BC
+        ebx = ebx + ecx - name_len
+    ebx &= 0xFFFFFFFF
+    serial += str(calc122(ebx)) + '-'
+
+    for i in range(0, name_len):
+        ecx = ord(name[i])
+        ecx = ecx * name_len * 0x4C6
+        ebx = ebx + ecx + name_len
+    ebx = (ebx + 0x21C6918E) & 0xFFFFFFFF
+    serial += str(calc122(ebx))
+    print(serial)
+crackme122()
+
