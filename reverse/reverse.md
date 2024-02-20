@@ -3957,8 +3957,6 @@ def crackme121():
 
 
 
-
-
 ## 122-DFCG-crackme
 
 三次变换得到三部分序列号，结构清晰。
@@ -3998,6 +3996,63 @@ def crackme122():
         ebx = ebx + ecx + name_len
     ebx = (ebx + 0x21C6918E) & 0xFFFFFFFF
     serial += str(calc122(ebx))
+    print(serial)
+```
+
+
+
+## 123-keygenme-inf1
+
+![image-20240220164433354](./reverse.assets/image-20240220164433354.png)
+
+```python
+def crackme123():
+    name = 'walex'
+    eax = 0x29A
+    for i in name:
+        ecx = ord(i)
+        esi = ecx ^ 0xDADA
+        esi += eax
+        eax = ecx
+        eax ^= 0xBABE
+        ecx ^= 0xF001
+        eax = 0xFFFFFFFF - eax
+        if eax + 4 * esi >= 0xFFFFFFFF:
+            eax = eax + 4 * esi - 0xFFFFFFFF
+        else:
+            eax = eax + 4 * esi
+        eax >>= 3
+        eax += ecx
+    eax += 0x28F
+    ecx = 0x1234
+    eax %= ecx
+    for i in range(0, 0x10001):
+        if ((eax * i) & REGISTER_MAX) % 0x10001 == 1:
+            print(hex(i))
+```
+
+
+
+## 124-Fishing With DiLA-v5
+
+评价为开门见山。
+
+![image-20240220164835590](./reverse.assets/image-20240220164835590.png)
+
+中间控制return地址的手法很有意思。补码运算统统还给老师了，真记不得了。
+
+![image-20240220172512871](./reverse.assets/image-20240220172512871.png)
+
+```python
+def crackme124():
+    target = 0x3ADAFFCF
+    target_lor = 0xFFCF3ADA
+    serial = target_lor ^ 0xDEAF
+    # 补码
+    serial = REGISTER_MAX - serial + 1
+    # ah + 0x20有进位
+    # 所以-0x2000变成+0xE000
+    serial += 0xE000
     print(serial)
 ```
 

@@ -1,3 +1,6 @@
+REGISTER_MAX = 0xFFFFFFFF
+
+
 def rol(number):
     if (number * 2) > 0xFFFFFFFF:
         number = ((number * 2) & 0xFFFFFFFF) + 1
@@ -1773,6 +1776,7 @@ def calc122(num):
     else:
         return num
 
+
 def crackme122():
     name = 'walex'
     serial = ''
@@ -1800,5 +1804,41 @@ def crackme122():
     ebx = (ebx + 0x21C6918E) & 0xFFFFFFFF
     serial += str(calc122(ebx))
     print(serial)
-crackme122()
+
+
+def crackme123():
+    name = 'walex'
+    eax = 0x29A
+    for i in name:
+        ecx = ord(i)
+        esi = ecx ^ 0xDADA
+        esi += eax
+        eax = ecx
+        eax ^= 0xBABE
+        ecx ^= 0xF001
+        eax = 0xFFFFFFFF - eax
+        if eax + 4 * esi >= 0xFFFFFFFF:
+            eax = eax + 4 * esi - 0xFFFFFFFF
+        else:
+            eax = eax + 4 * esi
+        eax >>= 3
+        eax += ecx
+    eax += 0x28F
+    ecx = 0x1234
+    eax %= ecx
+    for i in range(0, 0x10001):
+        if ((eax * i) & REGISTER_MAX) % 0x10001 == 1:
+            print(hex(i))
+
+
+def crackme124():
+    target = 0x3ADAFFCF
+    target_lor = 0xFFCF3ADA
+    serial = target_lor ^ 0xDEAF
+    # 补码
+    serial = REGISTER_MAX - serial + 1
+    # ah有进位
+    serial += 0xE000
+    print(serial)
+crackme124()
 
