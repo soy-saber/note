@@ -1840,5 +1840,36 @@ def crackme124():
     # ah有进位
     serial += 0xE000
     print(serial)
-crackme124()
+
+
+def crackme125():
+    name = 'walex'
+    company = 'arknight'
+    hardcode = [0x2c, 0x61, 0x23, 0x47, 0x0E, 0x26, 0x61, 0x20, 0x31, 0x49, 0x36, 0x24, 0x2b, 0x42, 0x31, 0x63, 0x0E, 0x29, 0x5e, 0x30, 0x4b, 0x38, 0x2a, 0x33, 0x44, 0x3d]
+    ebp_C = hardcode[ord(name[0])-ord('a')]
+    esi = hardcode[ord(name[2])-ord('a')]
+    edi = hardcode[ord(company[-2])-ord('a')]
+    eax = hardcode[ord(company[-1])-ord('a')]
+    edx = hardcode[ord(name[3])-ord('a')]
+    ecx = hardcode[ord(company[2]) - ord('a')]
+    edx *= ecx
+    ebp_8 = edx
+    edx = ebp_C * esi * edi * eax + ebp_8
+    eax = (edx ^ 0x28D8) + 0x288D4A7D
+    ecx = 0x3039
+    for i in range(0, 6):
+        ecx = rol(ecx)
+    eax ^= 0x9714
+    for i in range(0, 2):
+        eax = ror(eax)
+    eax >>= 3
+    eax += ecx + ebp_8 + 1
+    temp = eax % 0x10000
+    temp = 0xFFFF - temp
+    eax = eax - (eax % 0x10000) + temp
+    eax += 0x29A
+    print(eax)
+    
+
+crackme125()
 

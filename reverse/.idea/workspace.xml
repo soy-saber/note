@@ -100,13 +100,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/reverse.py</url>
-          <line>1827</line>
-          <option name="timeStamp" value="14" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -118,6 +111,7 @@
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="eax" language="Python" />
+        <watch expression="name[-2]" />
       </configuration>
     </watches-manager>
   </component>
