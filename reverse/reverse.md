@@ -4094,3 +4094,106 @@ def crackme125():
     print(eax)
 ```
 
+ 
+
+## 126-llydd-crackme
+
+因为temp2、temp3都异或了，temp4位置也默认异或了一下，这对我的解题时长和思路造成了毁灭性打击。
+
+![image-20240222141634736](./reverse.assets/image-20240222141634736.png)
+
+![image-20240222141526164](./reverse.assets/image-20240222141526164.png)
+
+```python
+def crackme126():
+    # name = 'walex'
+    # name_len = len(name)
+    # serial = '12345'
+    # serial_len = len(serial)
+    # temp1 = []
+    # for i in range(0, name_len):
+    #     temp1.append(ord(name[i]) ^ ord(serial[i]))
+    # al = serial[serial_len >> 1]
+    # temp2 = []
+    # for i in range(0, name_len):
+    #     dl = temp1[i]
+    #     dl ^= ord(al)
+    #     temp2.append(dl)
+    # temp3 = []
+    # for i in range(0, name_len):
+    #     dl = temp2[i]
+    #     if ord(al) >= 0x41:
+    #         dl ^= ord(al) - 0x41
+    #     else:
+    #         dl ^= ord(al) + 0x100 - 0x41
+    #     temp3.append(dl)
+    # temp4 = []
+    # for i in range(0, name_len):
+    #     dl = temp3[i]
+    #     al = name_len
+    #     al += serial_len
+    #     dl += al
+    #     temp4.append(dl)
+    # for i in temp4:
+    #     print(hex(i))
+    # name[i] = name[i] ^ serial[i] ^ serial[serial_len >> 1] ^ serial[serial_len >> 1] - 0x41 + name_len + serial_len = serial[i]
+    # name[i] = (serial[i] - 2 * serial_len) ^ serial[i] ^ serial[serial_len >> 1] ^ serial[serial_len >> 1] - 0x41
+    # 要写标准注册机的话得做遍历，方程多解
+    serial = 'walex'
+    serial_len = len(serial)
+    name = ''
+    for i in serial:
+        name += chr((ord(i) - 2 * serial_len) ^ ord(i) ^ (ord(serial[serial_len >> 1])) ^ (ord(serial[serial_len >> 1]) - 0x41))
+    print(name)
+```
+
+
+
+## 127-skillas_keygenme4
+
+中间这段操作半天，实际完成的操作就是十进制->十六进制。
+
+更正：在处理ABCDEF时就不是直接转变了，一开始input的是123456没发现。
+
+![image-20240223133822702](./reverse.assets/image-20240223133822702.png)
+
+有个很搞也很有意思的地方，serial需要是八位数正好填满一个寄存器，不然就会有上图内存里09那样的不可控数被读出来，到时候就寄了。
+
+![image-20240223144319700](./reverse.assets/image-20240223144319700.png)
+
+如同更正所言，程序在处理十六进制特有字符时会出现问题，如将db->fb
+
+
+
+![image-20240223152533333](./reverse.assets/image-20240223152533333.png)
+
+原因是在解析b，即第二位数的时候-0x37，但事实上还剩下0x20，这也就是f-d=2的来源。因此当第二位数为abcedf是要将一位减二。
+
+搞明白了以上两点，题目也就结束了。
+
+![image-20240223155330104](./reverse.assets/image-20240223155330104.png)
+
+```python
+def crackme127():
+    xor_code = 0xAD924AC0
+    add_code = 0xDEAD
+    mul_code = 0x2
+    shr_code = 0x3
+    sub_code = 0x1337
+    target = 0x4010FB
+    temp = (((target + sub_code) << shr_code) // mul_code - add_code) ^ xor_code
+    serial = ''
+    print(hex(temp))
+    for i in range(8, 1, -2):
+        if hex(temp)[i+1] >= 'a':
+            if hex(temp)[i] == 'b':
+                serial += '9' + hex(temp)[i+1]
+            elif hex(temp)[i] == 'a':
+                serial += '8' + hex(temp)[i+1]
+            else:
+                serial += chr(ord(hex(temp)[i])-2) + hex(temp)[i+1]
+        else:
+            serial += hex(temp)[i: i+2]
+    print(serial)
+```
+

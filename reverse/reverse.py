@@ -1869,7 +1869,73 @@ def crackme125():
     eax = eax - (eax % 0x10000) + temp
     eax += 0x29A
     print(eax)
-    
 
-crackme125()
+
+def crackme126():
+    # name = 'walex'
+    # name_len = len(name)
+    # serial = '12345'
+    # serial_len = len(serial)
+    # temp1 = []
+    # for i in range(0, name_len):
+    #     temp1.append(ord(name[i]) ^ ord(serial[i]))
+    # al = serial[serial_len >> 1]
+    # temp2 = []
+    # for i in range(0, name_len):
+    #     dl = temp1[i]
+    #     dl ^= ord(al)
+    #     temp2.append(dl)
+    # temp3 = []
+    # for i in range(0, name_len):
+    #     dl = temp2[i]
+    #     if ord(al) >= 0x41:
+    #         dl ^= ord(al) - 0x41
+    #     else:
+    #         dl ^= ord(al) + 0x100 - 0x41
+    #     temp3.append(dl)
+    # temp4 = []
+    # for i in range(0, name_len):
+    #     dl = temp3[i]
+    #     al = name_len
+    #     al += serial_len
+    #     dl += al
+    #     temp4.append(dl)
+    # for i in temp4:
+    #     print(hex(i))
+    # name[i] = name[i] ^ serial[i] ^ serial[serial_len >> 1] ^ serial[serial_len >> 1] - 0x41 + name_len + serial_len = serial[i]
+    # name[i] = (serial[i] - 2 * serial_len) ^ serial[i] ^ serial[serial_len >> 1] ^ serial[serial_len >> 1] - 0x41
+    # 要写标准注册机的话得做遍历，方程多解
+    serial = 'walex'
+    serial_len = len(serial)
+    name = ''
+    for i in serial:
+        name += chr((ord(i) - 2 * serial_len) ^ ord(i) ^ (ord(serial[serial_len >> 1])) ^ (ord(serial[serial_len >> 1]) - 0x41))
+    print(name)
+
+
+def crackme127():
+    xor_code = 0xAD924AC0
+    add_code = 0xDEAD
+    mul_code = 0x2
+    shr_code = 0x3
+    sub_code = 0x1337
+    target = 0x4010FB
+    temp = (((target + sub_code) << shr_code) // mul_code - add_code) ^ xor_code
+    serial = ''
+    print(hex(temp))
+    for i in range(8, 1, -2):
+        if hex(temp)[i+1] >= 'a':
+            if hex(temp)[i] == 'b':
+                serial += '9' + hex(temp)[i+1]
+            elif hex(temp)[i] == 'a':
+                serial += '8' + hex(temp)[i+1]
+            else:
+                serial += chr(ord(hex(temp)[i])-2) + hex(temp)[i+1]
+        else:
+            serial += hex(temp)[i: i+2]
+    print(serial)
+
+
+
+crackme127()
 
