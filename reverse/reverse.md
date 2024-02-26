@@ -4197,3 +4197,61 @@ def crackme127():
     print(serial)
 ```
 
+
+
+## 128-fist_crackme
+
+字符搜索没东西，比较尴尬的是不知道对于窗口程序应该给哪个函数下断点，直接F7跟下来
+
+![image-20240226101139651](./reverse.assets/image-20240226101139651.png)
+
+整个程序的难点就是怎么找到这个段落。
+
+![image-20240226102145768](./reverse.assets/image-20240226102145768.png)
+
+```python
+def crackme128():
+    serial = ''
+    serial += chr(0x57) + chr(0x4F) + chr(0x57) + chr(0x5F) + chr(0x59) + chr(0x4F) + chr(0x55) + chr(0x5F)
+    serial += chr(0x44) + chr(0x49) + chr(0x44) + chr(0x5F) + chr(0x49) + chr(0x54) + chr(0x21)
+    print(serial)
+```
+
+
+
+## 129-tc.14
+
+根据字符串打第一个断点，然后在输入serial的时候直接断进去了，感觉是个自动check的验证算法，从函数里return出来，在外面的函数头下断。
+
+![image-20240226102933181](./reverse.assets/image-20240226102933181.png)
+
+总体结构如下，关键内存为44192c，43f58c的call就是改这个内存地址的，需要重点关注。对于44192c，值为0时打印single，值为141时打印world。
+
+![image-20240226110007819](./reverse.assets/image-20240226110007819.png)
+
+进算法call看，修改44192c的逻辑很简单，将序列号逆序再和用户名对比，一致的话就不加，不一致就加，且ecx会自增。所以single解法直接逆序即可。
+
+![image-20240226105925250](./reverse.assets/image-20240226105925250.png)
+
+worldwide解法需要44192c为0x141，也很简单，直接等差数列求出需要多少位数，再把多的部分去掉即可。
+
+![image-20240226105933585](./reverse.assets/image-20240226105933585.png)
+
+![image-20240226112150979](./reverse.assets/image-20240226112150979.png)
+
+```python
+def crackme129():
+    num = 1
+    sum = 0
+    target = 0x141
+    while True:
+        if sum >= target:
+            print('num is {}, extra value is {}'.format(num - 1, sum - target))
+            break
+        sum += num
+        num += 1
+
+    name = 'walexwalexwalexwalexwalex'
+    serial = 'zzzzzzzzzzzzzzzzzzzzzezzz'
+```
+

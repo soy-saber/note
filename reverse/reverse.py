@@ -1,3 +1,5 @@
+import base64
+
 REGISTER_MAX = 0xFFFFFFFF
 
 
@@ -1936,6 +1938,26 @@ def crackme127():
     print(serial)
 
 
+def crackme128():
+    serial = ''
+    serial += chr(0x57) + chr(0x4F) + chr(0x57) + chr(0x5F) + chr(0x59) + chr(0x4F) + chr(0x55) + chr(0x5F)
+    serial += chr(0x44) + chr(0x49) + chr(0x44) + chr(0x5F) + chr(0x49) + chr(0x54) + chr(0x21)
+    print(serial)
 
-crackme127()
+
+def crackme129():
+    num = 1
+    sum = 0
+    target = 0x141
+    while True:
+        if sum >= target:
+            print('num is {}, extra value is {}'.format(num - 1, sum - target))
+            break
+        sum += num
+        num += 1
+
+    name = 'walexwalexwalexwalexwalex'
+    serial = 'zzzzzzzzzzzzzzzzzzzzzezzz'
+
+crackme129()
 
