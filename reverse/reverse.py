@@ -1959,5 +1959,52 @@ def crackme129():
     name = 'walexwalexwalexwalexwalex'
     serial = 'zzzzzzzzzzzzzzzzzzzzzezzz'
 
-crackme129()
+
+def crackme130():
+    ebx = 0x49390305
+    esi = 0x48631220
+    name = 'walex'
+    for i in name:
+        cl = ord(i)
+        ebx ^= cl
+        esi ^= ebx
+        if ebx & 0x1:
+            ebx >>= 1
+            ebx ^= 0x1200311
+        else:
+            ebx >>= 1
+    ebx = (10 - len(hex(ebx))) * '0' + hex(ebx)[2:]
+    esi = (10 - len(hex(esi))) * '0' + hex(esi)[2:]
+    serial = ebx[4:] + '-' + ebx[:4] + '-' + esi[4:] + '-' + esi[:4]
+    print(serial.upper())
+
+
+def crackme131():
+    name = 'walex123'
+    code = 33247872
+    serial = 'TCRKM7-'
+    hardcode = 'ANGBSZMLYFXRKWCcQDTIVOHPUE'
+    #  hardcode[num] = serial[i]
+    #  code = num - [i]
+    for i in range(0, len(str(code))):
+        num = int(str(code)[i]) + i
+        serial += hardcode[num]
+
+    # code only
+    # 0x30 - 0x39
+    index1 = [0x1, 0x2, 0x5, 0x6, 0x9, 0xA, 0xD, 0xE]
+    # 0x61 - 0x7A
+    index2 = [0x3, 0x4, 0xB]
+    # 0x41 - 0x5A
+    index3 = [0x7, 0x8, 0xC]
+    # 12位组成的数字比56位大9
+    # 90位组成的数组与56位相加为99
+    # 13 14位组成的数与90位相加为66
+    print(chr(0x74))
+    # 然后制定了其余各位的数值
+    code = '72pv63LG36tX30'
+
+
+
+crackme131()
 

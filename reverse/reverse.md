@@ -4233,9 +4233,9 @@ def crackme128():
 
 ![image-20240226105925250](./reverse.assets/image-20240226105925250.png)
 
-worldwide解法需要44192c为0x141，也很简单，直接等差数列求出需要多少位数，再把多的部分去掉即可。
-
 ![image-20240226105933585](./reverse.assets/image-20240226105933585.png)
+
+worldwide解法需要44192c为0x141，也很简单，直接等差数列求出需要多少位数，再把多的部分去掉即可。
 
 ![image-20240226112150979](./reverse.assets/image-20240226112150979.png)
 
@@ -4253,5 +4253,62 @@ def crackme129():
 
     name = 'walexwalexwalexwalexwalex'
     serial = 'zzzzzzzzzzzzzzzzzzzzzezzz'
+```
+
+
+
+## 130-fireworx.6
+
+![image-20240226145017966](./reverse.assets/image-20240226145017966.png)
+
+
+
+## 131-Northpole
+
+搜字符串第一次搜岔劈了，不知道歪到哪里去了，正解要定在这里。
+
+![image-20240228160116934](./reverse.assets/image-20240228160116934.png)
+
+在尝试中发现，这个程序只有在serial改变的时候才会完整的过check，直接test会直接给个不对的弹窗（这里是改了内存。
+
+![image-20240228114434678](./reverse.assets/image-20240228114434678.png)
+
+逻辑稍微有点绕，不过流程不长。
+
+![image-20240228180232400](./reverse.assets/image-20240228180232400.png)
+
+下面看code only，找函数头划拉了半天，但看起来像是类似硬编码一样的东西。
+
+![image-20240228180706691](./reverse.assets/image-20240228180706691.png)
+
+终。
+
+![image-20240229153819143](./reverse.assets/image-20240229153819143.png)
+
+```python
+def crackme131():
+    name = 'walex123'
+    code = 33247872
+    serial = 'TCRKM7-'
+    hardcode = 'ANGBSZMLYFXRKWCcQDTIVOHPUE'
+    #  hardcode[num] = serial[i]
+    #  code = num - [i]
+    for i in range(0, len(str(code))):
+        num = int(str(code)[i]) + i
+        serial += hardcode[num]
+
+    # code only
+    # 0x30 - 0x39
+    index1 = [0x1, 0x2, 0x5, 0x6, 0x9, 0xA, 0xD, 0xE]
+    # 0x61 - 0x7A
+    index2 = [0x3, 0x4, 0xB]
+    # 0x41 - 0x5A
+    index3 = [0x7, 0x8, 0xC]
+    # 12位组成的数字比56位大9
+    # 90位组成的数组与56位相加为99
+    # 13 14位组成的数与90位相加为66
+    print(chr(0x74))
+    # 然后制定了其余各位的数值
+    code = '72pv63LG36tX30'
 ```
 
