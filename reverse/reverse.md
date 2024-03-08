@@ -4312,3 +4312,53 @@ def crackme131():
     code = '72pv63LG36tX30'
 ```
 
+
+
+## 132-figugegl.3b
+
+逻辑很清晰。
+
+![image-20240308114148836](./reverse.assets/image-20240308114148836.png)
+
+```python
+def crackme132():
+    hardcode = 'figugegl'
+    name = 'yuukalex'
+    serial = ''
+    ecx = 0x7
+    for i in range(0, len(name)):
+        edx = ord(name[i])
+        edx ^= ord(hardcode[ecx - i])
+        edx %= 0x8
+        serial += hardcode[edx]
+    print(serial)
+```
+
+
+
+## 133-nextco-CM5
+
+我的程序运行到这里eax为1，然后jnz报错了。
+
+![image-20240308142335264](./reverse.assets/image-20240308142335264.png)
+
+![image-20240308143657271](./reverse.assets/image-20240308143657271.png)
+
+看了眼视频发现serial是对的，跳转原因说是"时间计数器防调试"，不过我正常运行填写serial仍然报错，原因不明。
+
+![image-20240308143306787](./reverse.assets/image-20240308143306787.png)
+
+算法是小学方程，没啥好写的。
+
+```python
+def crackme133():
+    # 6 + 3 = 0xDD
+    # 3 - 6 = 0x7
+    # 4 - 5 + 1 = 0x25
+    # 5 - 4 + 2 = 0x5E
+    # 2 - 1 = 0x41
+    # 5 = 0x61
+    # 1 + ... + 7 = 0x24A
+    serial = '!break$'
+```
+

@@ -2000,11 +2000,31 @@ def crackme131():
     # 12位组成的数字比56位大9
     # 90位组成的数组与56位相加为99
     # 13 14位组成的数与90位相加为66
-    print(chr(0x74))
     # 然后制定了其余各位的数值
     code = '72pv63LG36tX30'
 
 
+def crackme132():
+    hardcode = 'figugegl'
+    name = 'yuukalex'
+    serial = ''
+    ecx = 0x7
+    for i in range(0, len(name)):
+        edx = ord(name[i])
+        edx ^= ord(hardcode[ecx - i])
+        edx %= 0x8
+        serial += hardcode[edx]
+    print(serial)
 
-crackme131()
+
+def crackme133():
+    # 6 + 3 = 0xDD
+    # 3 - 6 = 0x7
+    # 4 - 5 + 1 = 0x25
+    # 5 - 4 + 2 = 0x5E
+    # 2 - 1 = 0x41
+    # 5 = 0x61
+    # 1 + ... + 7 = 0x24A
+    serial = '!break$'
+crackme133()
 
