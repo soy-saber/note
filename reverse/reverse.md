@@ -4362,3 +4362,54 @@ def crackme133():
     serial = '!break$'
 ```
 
+
+
+## 134-KGNME2-KiTo
+
+![image-20240311101156518](./reverse.assets/image-20240311101156518.png)
+
+
+
+## 135-Szi-crackme
+
+serial长度为0xB，11。
+
+![image-20240311102117090](./reverse.assets/image-20240311102117090.png)
+
+硬编码，典。
+
+![image-20240311102238015](./reverse.assets/image-20240311102238015.png)
+
+中间就是关键Call。（看视频发现这关键call位置定错了？？？有点离谱吧
+
+![image-20240311134714015](./reverse.assets/image-20240311134714015.png)
+
+留着回家琢磨一下。
+
+
+
+## 136-nago
+
+神奇，字符转整形。
+
+![image-20240311141532901](./reverse.assets/image-20240311141532901.png)
+
+cmp了0x3039(结果是12345，我一般输123456，差点中了笑死)
+
+![image-20240311141716737](./reverse.assets/image-20240311141716737.png)
+
+```python
+def crackme136():
+    eax = ebx = 0
+    length = 6
+    for i in range(0, length):
+        eax <<= 1
+        ebx = eax
+        eax <<= 1
+        eax <<= 1
+        ebx += i + 1
+        eax += ebx
+    print(eax)
+    print(0x3039)
+```
+

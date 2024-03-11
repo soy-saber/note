@@ -2026,5 +2026,33 @@ def crackme133():
     # 5 = 0x61
     # 1 + ... + 7 = 0x24A
     serial = '!break$'
-crackme133()
+
+
+def crackme134():
+    name = 'lovelyuuka'
+    sum = 0
+    for i in name:
+        sum += ord(i)
+    serial = sum * 0x539
+    print(serial)
+
+
+def crackme135():
+    hardcode = 'ibetthatyoucantcrackthis'
+    hardcode_hacker = 'i1b2e3t4t5h6a7t8y9o0ucantcrackthis'
+
+
+def crackme136():
+    eax = ebx = 0
+    length = 6
+    for i in range(0, length):
+        eax <<= 1
+        ebx = eax
+        eax <<= 1
+        eax <<= 1
+        ebx += i + 1
+        eax += ebx
+    print(eax)
+    print(0x3039)
+crackme136()
 
