@@ -4413,3 +4413,62 @@ def crackme136():
     print(0x3039)
 ```
 
+
+
+## 137-Get The Password
+
+![image-20240312105949300](./reverse.assets/image-20240312105949300.png)
+
+![image-20240312105917005](./reverse.assets/image-20240312105917005.png)
+
+```python
+def crackme137():
+    serial = ''
+    # 大
+    serial += chr(0x47 + 1)
+    # 小
+    serial += chr(0x6D - 1)
+    # 等
+    serial += chr(0x56)
+    # 等
+    serial += chr(0x66)
+    # 等
+    serial += chr(0x33)
+    # 大
+    serial += chr(0x79 + 1)
+    # 等
+    serial += chr(0x38)
+    # 小
+    serial += chr(0x4E - 1)
+    # 不等
+    serial += 'y'
+    # 等
+    serial += chr(0x32)
+    print(serial)
+```
+
+
+
+## 138-bytel0rds_crackme_n1
+
+关键check 405688需要等于1，输入为[0x405688]，过一个call
+
+![image-20240312112234166](./reverse.assets/image-20240312112234166.png)
+
+40566C：name的sum中1的数量
+
+405670：regcode4位一循环一通操作+最后一位的奇偶
+
+405674：初始0，转int的存放位置
+
+405678：初始1，temp
+
+40567C：
+
+405680：0x80000000
+
+405684：0x3FFF
+
+这个位置pop eax的值为7A1200，感觉像是个硬编码或者根据机器直接得出来的。
+
+![image-20240312175406220](./reverse.assets/image-20240312175406220.png)

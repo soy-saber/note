@@ -2054,5 +2054,61 @@ def crackme136():
         eax += ebx
     print(eax)
     print(0x3039)
-crackme136()
+
+
+def crackme137():
+    serial = ''
+    # 大
+    serial += chr(0x47 + 1)
+    # 小
+    serial += chr(0x6D - 1)
+    # 等
+    serial += chr(0x56)
+    # 等
+    serial += chr(0x66)
+    # 等
+    serial += chr(0x33)
+    # 大
+    serial += chr(0x79 + 1)
+    # 等
+    serial += chr(0x38)
+    # 小
+    serial += chr(0x4E - 1)
+    # 不等
+    serial += 'y'
+    # 等
+    serial += chr(0x32)
+    print(serial)
+
+
+def crackme138():
+    regkey = '123-567-911-W'
+    pos_405670 = 0
+    for i in range(1, 4):
+        edx = 0xB - i
+        pos_405670 += edx * (ord(regkey[i-1]) - 0x30)
+    for i in range(5, 8):
+        edx = 0xC - i
+        pos_405670 += edx * (ord(regkey[i-1]) - 0x30)
+    for i in range(9, 0xC):
+        edx = 0xD - i
+        pos_405670 += edx * (ord(regkey[i-1]) - 0x30)
+    print(pos_405670)
+
+    pos_405674 = 0
+    pos_405678 = 1
+    serial = '12345'
+    serial = serial[::-1]
+    # 字符串转整数
+    for i in serial:
+        eax = (ord(i) - 0x30) * pos_405678
+        pos_405674 += eax
+        pos_405678 *= 10
+    eax = 0x7A1200
+    eax %= pos_405674
+    print(eax)
+    print(pos_405674, pos_405678)
+
+
+crackme138()
 
