@@ -2106,7 +2106,10 @@ def crackme138():
             binary_one_num += 1
         total >>= 1
     print(binary_one_num)
-
+    pos_40567C = 1
+    for i in range(0, binary_one_num):
+        pos_40567C *= 200
+    print(hex(pos_40567C))
     pos_405674 = 0
     pos_405678 = 1
     serial = '12345'
