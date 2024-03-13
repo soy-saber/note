@@ -2093,7 +2093,19 @@ def crackme138():
     for i in range(9, 0xC):
         edx = 0xD - i
         pos_405670 += edx * (ord(regkey[i-1]) - 0x30)
+    pos_405670 += ord(regkey[-1]) % 2
     print(pos_405670)
+
+    name = 'walex'
+    total = 0
+    binary_one_num = 0
+    for i in name:
+        total += ord(i)
+    while total:
+        if total % 2 == 1:
+            binary_one_num += 1
+        total >>= 1
+    print(binary_one_num)
 
     pos_405674 = 0
     pos_405678 = 1
@@ -2107,7 +2119,15 @@ def crackme138():
     eax = 0x7A1200
     eax %= pos_405674
     print(eax)
-    print(pos_405674, pos_405678)
+    # 看了半天发现只有这段有用.?
+    target_eax = 0x2
+    for modulus in range(0x10000, 0x99999):
+        if 0x7A1200 % modulus == target_eax:
+            print('模数为:{}'.format(modulus))
+            break
+
+
+
 
 
 crackme138()
