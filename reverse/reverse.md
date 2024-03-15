@@ -4467,9 +4467,9 @@ def crackme137():
 
 405684：0x3FFF
 
-（发现好多都没用上，难绷
+（发现好多都没用上，难绷（再翻一遍发现其实都用上了，更难绷了
 
-这个位置pop eax的值为7A1200，感觉像是个硬编码或者根据机器直接得出来的，eax为模serial的值。
+这个位置pop eax的值为7A1200，~~感觉像是个硬编码或者根据机器直接得出来的~~，0x405670自乘0x40566C次，eax为模serial的值。
 
 ![image-20240312175406220](./reverse.assets/image-20240312175406220.png)
 
@@ -4481,6 +4481,91 @@ eax进这里，结束。
 
 ![image-20240313134612080](./reverse.assets/image-20240313134612080.png)
 
+再翻了一遍，确认了7A1200的来历，但是4031D0这个位置的跳转给我看晕了，没研究明白，摆了。注册机大概如下，给walex多整了几个注册码，赢。
+
+```python
+def crackme138():
+    regkey = '123-567-911-W'
+    pos_405670 = 0
+    for i in range(1, 4):
+        edx = 0xB - i
+        pos_405670 += edx * (ord(regkey[i-1]) - 0x30)
+    for i in range(5, 8):
+        edx = 0xC - i
+        pos_405670 += edx * (ord(regkey[i-1]) - 0x30)
+    for i in range(9, 0xC):
+        edx = 0xD - i
+        pos_405670 += edx * (ord(regkey[i-1]) - 0x30)
+    pos_405670 += ord(regkey[-1]) % 2
+    print(pos_405670)
+
+    name = 'walex'
+    total = 0
+    binary_one_num = 0
+    for i in name:
+        total += ord(i)
+    while total:
+        if total % 2 == 1:
+            binary_one_num += 1
+        total >>= 1
+    print(binary_one_num)
+
+    pos_40567C = 1
+    for i in range(0, binary_one_num):
+        pos_40567C *= 200
+    pos_40567C &= 0xFFFFFFFF
+    print(hex(pos_40567C))
+    # pos_405674 = 0
+    # pos_405678 = 1
+    # serial = '12345'
+    # serial = serial[::-1]
+    # # 字符串转整数
+    # for i in serial:
+    #     eax = (ord(i) - 0x30) * pos_405678
+    #     pos_405674 += eax
+    #     pos_405678 *= 10
+    # eax = 0x7A1200
+    # eax %= pos_405674
+    # print(eax)
+    target_eax = 0x2
+    for modulus in range(0x2710, 0x1869F):
+        if pos_40567C % modulus == target_eax:
+            print('模数为:{}'.format(modulus))
+
+walex
+200
+3
+0x7a1200
+模数为:11994
+模数为:45977
+模数为:57971
+模数为:91954
 ```
+
+
+
+## 139-crackme n.3 by COSTY
+
+这题有一点抽象把（流汗黄豆😓，这个401410 call是个什么东西
+
+需要ebp-0x10为0，即ebp-0xC一直不为0，即ebp-0x4一直不能整除ebp-0x8，即ebp-0x4是个质数。
+
+![image-20240315161449563](./reverse.assets/image-20240315161449563.png)
+
+![image-20240315162100119](./reverse.assets/image-20240315162100119.png)
+
+```python
+def crackme139():
+    from sympy import isprime
+    for i in range(10000000, 99999999):
+        if isprime(i):
+            print(i)
+            break
 ```
+
+
+
+## 140-crackme1_nitroito
+
+在不到5个字符报错的位置报错并触发，F12往上追溯一个函数，到达目的地0x404180。
 

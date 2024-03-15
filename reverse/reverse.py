@@ -2106,32 +2106,51 @@ def crackme138():
             binary_one_num += 1
         total >>= 1
     print(binary_one_num)
+
     pos_40567C = 1
     for i in range(0, binary_one_num):
         pos_40567C *= 200
+    pos_40567C &= 0xFFFFFFFF
     print(hex(pos_40567C))
-    pos_405674 = 0
-    pos_405678 = 1
-    serial = '12345'
-    serial = serial[::-1]
-    # 字符串转整数
-    for i in serial:
-        eax = (ord(i) - 0x30) * pos_405678
-        pos_405674 += eax
-        pos_405678 *= 10
-    eax = 0x7A1200
-    eax %= pos_405674
-    print(eax)
-    # 看了半天发现只有这段有用.?
+    # pos_405674 = 0
+    # pos_405678 = 1
+    # serial = '12345'
+    # serial = serial[::-1]
+    # # 字符串转整数
+    # for i in serial:
+    #     eax = (ord(i) - 0x30) * pos_405678
+    #     pos_405674 += eax
+    #     pos_405678 *= 10
+    # eax = 0x7A1200
+    # eax %= pos_405674
+    # print(eax)
     target_eax = 0x2
-    for modulus in range(0x10000, 0x99999):
-        if 0x7A1200 % modulus == target_eax:
+    for modulus in range(0x2710, 0x1869F):
+        if pos_40567C % modulus == target_eax:
             print('模数为:{}'.format(modulus))
+
+
+def crackme139():
+    from sympy import isprime
+    for i in range(10000000, 99999999):
+        if isprime(i):
+            print(i)
             break
 
 
+def crackme140():
+    name = 'walex'
+    str_hardcode = "36 37 38 39 30 41 42 43 44 45 46 47 48 49 4A 4B 4C 4D 4E 4" \
+               "F 50 51 52 53 54 55 56 57 58 59 5A C1 C9 CD D3 DA C0 C8 CC D2 D9 C2 CA CE D4"
+    hardcode1 = []
+    for i in range(0, len(str_hardcode)):
+        if str_hardcode[i] == ' ':
+            hardcode.append(eval('0x' + str_hardcode[i-2:i]))
+        elif i == len(str_hardcode) - 1:
+            hardcode.append(eval('0x' + str_hardcode[i-1:i+1]))
+    print(hardcode)
+    serial = '123456-123456-123456-123456'
+    pos_7 = pos_14 = pos_21 = '-'
 
-
-
-crackme138()
+crackme140()
 
