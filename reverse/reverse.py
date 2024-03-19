@@ -2181,9 +2181,45 @@ def crackme140():
             serial += chr(0x30 + edx)
         else:
             serial += chr(0x37 + edx)
+    serial += '-'
     print(serial)
 
     # pos_403C08
+    temp = 0
+    eax = 0
+    for i in range(0, len(hardcode)):
+        eax = hardcode[i]
+        eax = (eax + i + 1) * 2
+        eax += temp
+        temp = eax
+    total = len(hardcode) + eax
+    temp = 0
+    for i in range(0, len(hardcode)):
+        eax = hardcode[i]
+        eax ^= total
+        eax *= i + 1
+        eax += temp
+        temp = eax
+        eax = (i + 1) ^ total
+        eax |= temp
+        temp = eax
+    print(hex(eax))
+    ebx = 0x1A
+    part_serial = ''
+    while temp:
+        edx = temp % ebx
+        temp //= ebx
+        if edx < 0xA:
+            part_serial += chr(0x30 + edx)
+        else:
+            part_serial += chr(0x37 + edx)
+    serial += part_serial[::-1] + '-'
+    print(serial)
+
+
+    print(serial)
+
+
     serial = '123456-123456-123456-123456'
     pos_7 = pos_14 = pos_21 = '-'
 
