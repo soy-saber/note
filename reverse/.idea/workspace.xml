@@ -112,6 +112,7 @@
       <configuration name="PythonConfigurationType">
         <watch expression="eax" language="Python" />
         <watch expression="name[-2]" />
+        <watch expression="temp" language="Python" />
       </configuration>
     </watches-manager>
   </component>

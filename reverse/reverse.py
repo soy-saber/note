@@ -2142,13 +2142,48 @@ def crackme140():
     name = 'walex'
     str_hardcode = "36 37 38 39 30 41 42 43 44 45 46 47 48 49 4A 4B 4C 4D 4E 4" \
                "F 50 51 52 53 54 55 56 57 58 59 5A C1 C9 CD D3 DA C0 C8 CC D2 D9 C2 CA CE D4"
-    hardcode1 = []
+    hardcode = []
+    for i in name:
+        hardcode.append(ord(i))
     for i in range(0, len(str_hardcode)):
         if str_hardcode[i] == ' ':
             hardcode.append(eval('0x' + str_hardcode[i-2:i]))
         elif i == len(str_hardcode) - 1:
             hardcode.append(eval('0x' + str_hardcode[i-1:i+1]))
+    reverse_hardcode = hardcode[::-1]
     print(hardcode)
+    # pos_403CD8
+    temp = 0
+    eax = 0
+    for i in range(0, len(hardcode)):
+        eax = hardcode[i]
+        eax = (eax + i + 1) * 2
+        eax += temp
+        temp = eax
+    total = len(hardcode) + eax
+    temp = 0
+    for i in range(0, len(hardcode)):
+        eax = reverse_hardcode[i]
+        eax ^= total
+        eax *= i + 1
+        eax += temp
+        temp = eax
+        eax = (i + 1) ^ total
+        eax |= temp
+        temp = eax
+    print(hex(eax))
+    ebx = 0x1A
+    serial = ''
+    while temp:
+        edx = temp % ebx
+        temp //= ebx
+        if edx < 0xA:
+            serial += chr(0x30 + edx)
+        else:
+            serial += chr(0x37 + edx)
+    print(serial)
+
+    # pos_403C08
     serial = '123456-123456-123456-123456'
     pos_7 = pos_14 = pos_21 = '-'
 
