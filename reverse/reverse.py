@@ -2216,8 +2216,19 @@ def crackme140():
     serial += part_serial[::-1] + '-'
     print(serial)
 
+    str_hardcode1 = '31 32 33 34 35 36 37 38 39 30 41 42 43 44 45 46 47 48 49 4A 4B 4C 4D 4E 4F 50 51 52 53 54 55 5' \
+                    '6 57 58 59 5A C1 C9 CD D3 DA C0 C8 CC D2 D9 C2 CA CE D4 DB C3 D5 C4 CB CF D6 DC DD C7 D1'
+    hardcode1 = []
+    for i in range(0, len(str_hardcode1)):
+        if str_hardcode1[i] == ' ':
+            hardcode1.append(eval('0x' + str_hardcode1[i-2:i]))
+        elif i == len(str_hardcode) - 1:
+            hardcode1.append(eval('0x' + str_hardcode1[i-1:i+1]))
+    for i in range(0, len(hardcode)):
+        ecx = hardcode1[i] * 2
+        edx = ecx + hardcode[i]
 
-    print(serial)
+    print(hardcode1)
 
 
     serial = '123456-123456-123456-123456'
