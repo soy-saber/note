@@ -2152,6 +2152,7 @@ def crackme140():
             hardcode.append(eval('0x' + str_hardcode[i-1:i+1]))
     reverse_hardcode = hardcode[::-1]
     print(hardcode)
+
     # pos_403CD8
     temp = 0
     eax = 0
@@ -2216,20 +2217,52 @@ def crackme140():
     serial += part_serial[::-1] + '-'
     print(serial)
 
+    # pos_4039C4
     str_hardcode1 = '31 32 33 34 35 36 37 38 39 30 41 42 43 44 45 46 47 48 49 4A 4B 4C 4D 4E 4F 50 51 52 53 54 55 5' \
                     '6 57 58 59 5A C1 C9 CD D3 DA C0 C8 CC D2 D9 C2 CA CE D4 DB C3 D5 C4 CB CF D6 DC DD C7 D1'
     hardcode1 = []
+    hardcode2 = []
     for i in range(0, len(str_hardcode1)):
         if str_hardcode1[i] == ' ':
             hardcode1.append(eval('0x' + str_hardcode1[i-2:i]))
-        elif i == len(str_hardcode) - 1:
+        elif i == len(str_hardcode1) - 1:
             hardcode1.append(eval('0x' + str_hardcode1[i-1:i+1]))
     for i in range(0, len(hardcode)):
         ecx = hardcode1[i] * 2
         edx = ecx + hardcode[i]
+        hardcode2.append(edx & 0xFF)
 
-    print(hardcode1)
-
+    # pos_403C70
+    temp = 0
+    eax = 0
+    for i in range(0, len(hardcode2)):
+        eax = hardcode2[i]
+        eax = (eax + i + 1) * 2
+        eax += temp
+        temp = eax
+    total = len(hardcode2) + eax
+    temp = 0
+    for i in range(0, len(hardcode2)):
+        eax = hardcode2[i]
+        eax ^= total
+        eax *= i + 1
+        eax += temp
+        temp = eax
+        eax = (i + 1) ^ total
+        eax |= temp
+        temp = eax
+    print(hex(eax))
+    ebx = 0x1A
+    part_serial = ''
+    while temp:
+        edx = temp % ebx
+        temp //= ebx
+        if edx < 0xA:
+            part_serial += chr(0x30 + edx)
+        else:
+            part_serial += chr(0x37 + edx)
+    serial += part_serial[::-1] + '-'
+    print(serial)
 
     serial = '123456-123456-123456-123456'
     pos_7 = pos_14 = pos_21 = '-'
