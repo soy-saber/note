@@ -2139,7 +2139,7 @@ def crackme139():
 
 
 def crackme140():
-    name = 'walex'
+    name = 'yuukaw'
     str_hardcode = "36 37 38 39 30 41 42 43 44 45 46 47 48 49 4A 4B 4C 4D 4E 4" \
                "F 50 51 52 53 54 55 56 57 58 59 5A C1 C9 CD D3 DA C0 C8 CC D2 D9 C2 CA CE D4"
     hardcode = []
@@ -2231,6 +2231,7 @@ def crackme140():
         ecx = hardcode1[i] * 2
         edx = ecx + hardcode[i]
         hardcode2.append(edx & 0xFF)
+    print(hardcode2)
 
     # pos_403C70
     temp = 0
@@ -2264,8 +2265,30 @@ def crackme140():
     serial += part_serial[::-1] + '-'
     print(serial)
 
-    serial = '123456-123456-123456-123456'
-    pos_7 = pos_14 = pos_21 = '-'
+    # pos_403D60
+    hardcode2_reverse = hardcode2[::-1]
+    for i in range(0, len(hardcode2_reverse)):
+        eax = hardcode2_reverse[i]
+        eax ^= total
+        eax *= i + 1
+        eax += temp
+        temp = eax
+        eax = (i + 1) ^ total
+        eax |= temp
+        temp = eax
+    print(hex(eax))
+    ebx = 0x1A
+    part_serial = ''
+    while temp:
+        edx = temp % ebx
+        temp //= ebx
+        if edx < 0xA:
+            part_serial += chr(0x30 + edx)
+        else:
+            part_serial += chr(0x37 + edx)
+    serial += part_serial
+    print(serial)
+
 
 crackme140()
 
