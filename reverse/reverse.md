@@ -4732,3 +4732,107 @@ def crackme140():
     print(serial)
 ```
 
+
+
+## 141-NTS Crackme5
+
+不难，但这个+号做分隔符的写法没看过，记一下。
+
+![image-20240325134905816](./reverse.assets/image-20240325134905816.png)
+
+![image-20240325141631565](./reverse.assets/image-20240325141631565.png)
+
+```python
+def crackme141():
+    name = 'yuukaww'
+    edx = 0x1
+    ecx = 0
+    for i in name:
+        eax = ord(i)
+        esi = eax
+        eax = (eax * edx) & 0xFFFFFFFF
+        esi ^= 0x32142001
+        ecx = (ecx + esi) & 0xFFFFFFFF
+        ebx = 0x7
+        eax |= ecx
+        esi = eax
+        edx = eax % ebx
+        ebx = 0x5
+        edx += 0x2
+        ecx = (ecx * edx) & 0xFFFFFFFF
+        eax = ecx
+        edx = eax % ebx
+        edx += 0x3
+        edx = (edx * esi) & 0xFFFFFFFF
+    serial = (hex(ecx)[2:] + '-' + hex(edx)[2:]).upper()
+
+    ecx = 1
+    esi = 0
+    edi = 0
+    for i in name:
+        eax = ord(i)
+        edx = eax
+        eax = (eax * ecx) & 0xFFFFFFFF
+        edx |= 0xF001F001
+        ecx = eax
+        if esi < edx:
+            esi = 0x100000000 - edx + esi
+        else:
+            esi -= edx
+        edx = 0
+        ebp = 0x7
+        eax = ecx + esi
+        ecx |= esi
+        edi = (edi + eax) & 0xFFFFFFFF
+        eax = edi
+        edx = eax % ebp
+        ebp = 0xB
+        edx += 0x3
+        ecx = (ecx * edx) & 0xFFFFFFFF
+        ecx = (ecx + edi) & 0xFFFFFFFF
+        edx = eax % ebp
+        edx += 0x2
+        edx = (edx * esi) & 0xFFFFFFFF
+        edx = (edx + edi) & 0xFFFFFFFF
+        esi = edx
+        print(hex(ecx), hex(esi))
+    serial += '+' + (hex(esi)[2:] + '-' + hex(ecx)[2:]).upper()
+    print(serial)
+```
+
+
+
+## 142-xyzero-keygenme2
+
+```python
+def crackme142():
+    computer_name = "Win10-2022JMXRUAdministrator"
+    computer_name = computer_name[::-1].upper()
+    name = 'walex'
+    local1 = 0
+    local2 = 0x1791117
+    for i in name:
+        edx = ord(i)
+        edx += local2
+        local1 += edx
+        local2 += 1
+    esi = len(name) * local1
+    esi += local2
+
+    local6 = len(name)
+    local3 = 0
+    eax = 0x20
+    for i in computer_name:
+        ecx = ord(i)
+        ecx ^= eax
+        ecx *= local6
+        local3 += ecx
+        eax += 1
+    check1 = local3 + esi
+    serial = check1 ^ local3
+    print(serial)
+```
+
+
+
+## 143-CrackTHEKey#02
