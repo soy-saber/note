@@ -4836,3 +4836,41 @@ def crackme142():
 
 
 ## 143-CrackTHEKey#02
+
+用户名叠加之后保留最低两位al，并整体加al，要和hardcode一致。
+
+写了版注册机没跑出结果来，想看视频对个答案看看哪有问题。看到答案才发现原始序列也是有特征的，可能是个连接符-。
+
+![image-20240329111349647](./reverse.assets/image-20240329111349647.png)
+
+没跑出来的原因是我预测性质的在序列的尾部加了00（上图，导致出问题了。字符串尾的00是自然形成的，不需要从serial的层面进行干预。
+
+```python
+def crackme143():
+    str_hardcode = 'FE FA DD E1 E9 D5 EC E1 D9 FE FB D5 FE 01 EE F1 EA D5 F8 ED F6 FE D9 D5 F0 DD F7 F5 EB'
+    hardcode = []
+    for i in range(0, len(str_hardcode)):
+        if str_hardcode[i] == ' ':
+            if eval('0x' + str_hardcode[i-2:i]) < 0x10:
+                hardcode.append(eval('0x1' + str_hardcode[i-2:i]))
+            else:
+                hardcode.append(eval('0x' + str_hardcode[i-2:i]))
+        elif i == len(str_hardcode) - 1:
+            if eval('0x' + str_hardcode[i-1:i+1]) < 0x10:
+                hardcode.append(eval('0x1' + str_hardcode[i-1:i+1]))
+            else:
+                hardcode.append(eval('0x' + str_hardcode[i-1:i+1]))
+    dis = max(hardcode) - 0x7E
+    while max(hardcode) - dis <= 0x7E and min(hardcode) - dis >= 0x20:
+        total = 0
+        for i in hardcode:
+            total += i - dis
+        if total & 0xFF == dis:
+            serial = ''
+            for i in hardcode:
+                serial += chr(i - dis)
+            print(serial)
+            return
+        dis += 1
+```
+

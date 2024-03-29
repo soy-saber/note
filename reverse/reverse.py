@@ -2376,13 +2376,30 @@ def crackme142():
 
 
 def crackme143():
-    serial = '123456'
-    total = 0
-    for i in serial:
-        total += ord(i)
-        total &= 0xFF
-    true_serial = ''
-    for i in serial:
-        true_serial += chr(ord(i) + total)
-    print(true_serial)
+    str_hardcode = 'FE FA DD E1 E9 D5 EC E1 D9 FE FB D5 FE 01 EE F1 EA D5 F8 ED F6 FE D9 D5 F0 DD F7 F5 EB'
+    hardcode = []
+    for i in range(0, len(str_hardcode)):
+        if str_hardcode[i] == ' ':
+            if eval('0x' + str_hardcode[i-2:i]) < 0x10:
+                hardcode.append(eval('0x1' + str_hardcode[i-2:i]))
+            else:
+                hardcode.append(eval('0x' + str_hardcode[i-2:i]))
+        elif i == len(str_hardcode) - 1:
+            if eval('0x' + str_hardcode[i-1:i+1]) < 0x10:
+                hardcode.append(eval('0x1' + str_hardcode[i-1:i+1]))
+            else:
+                hardcode.append(eval('0x' + str_hardcode[i-1:i+1]))
+    dis = max(hardcode) - 0x7E
+    while max(hardcode) - dis <= 0x7E and min(hardcode) - dis >= 0x20:
+        total = 0
+        for i in hardcode:
+            total += i - dis
+        if total & 0xFF == dis:
+            serial = ''
+            for i in hardcode:
+                serial += chr(i - dis)
+            print(serial)
+            return
+        dis += 1
+
 crackme143()
