@@ -2402,4 +2402,10 @@ def crackme143():
             return
         dis += 1
 
-crackme143()
+
+def crackme144():
+    pos_404124 = 0x10427410
+    print(pos_404124)
+
+
+crackme144()
