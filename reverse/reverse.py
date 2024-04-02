@@ -2408,4 +2408,66 @@ def crackme144():
     print(pos_404124)
 
 
-crackme144()
+def crackme145():
+    # 总和4078
+    print((0xFEE | 0xE0) // 3)
+
+
+def crackme146():
+    password = '9999999'
+    # 求密码长度
+    # for len_password in range(1, 100):
+    #     eax = len_password * len_password
+    #     edx = eax
+    #     ecx = eax * len_password
+    #     eax <<= 0x2
+    #     eax += edx
+    #     ecx -= eax
+    #     eax = edx = len_password
+    #     eax = 6 * eax
+    #     ecx -= eax
+    #     if ecx == 0x38:
+    #         print(len_password)
+
+    local5 = 0
+    for i in range(0, 6):
+        eax = ord(password[i]) * 3
+        edx = eax - 0x28
+        eax = ord(password[i])
+        edx *= eax
+        local5 += edx
+    print(hex(local5))
+    # 遍历一个符合条件的local5 init为1111111(7ae2 end为9999999(af02
+    for local5 in range(0x7ae2, 0xaf02):
+        ecx = local5
+        eax = 0x66666667
+        edx = (ecx * eax) // 0x100000000
+        eax = (ecx * eax) & 0xFFFFFFFF
+        edx >>= 0x2
+        eax >>= 0x1F
+        edx -= eax
+        eax = edx
+        eax <<= 0x2
+        eax += edx
+        eax += eax
+        ecx -= eax
+        if ecx == 0:
+            print('正确的local5出现了:{}'.format(local5))
+            # 遍历这个local5值是否能被求出
+            for i in range(1111111, 9999999):
+                str_password = str(i)
+                value = 0
+                for j in range(0, 6):
+                    eax = ord(str_password[j]) * 3
+                    edx = eax - 0x28
+                    eax = ord(str_password[j])
+                    edx *= eax
+                    value += edx
+                if local5 == value:
+                    print('local5 {}对应值为{}'.format(local5, i))
+                    return
+
+
+def crackme147():
+
+crackme147()
