@@ -4968,3 +4968,113 @@ def crackme146():
 
 ## 147-Prolixe-KeygenMe#1
 
+这题是给我整的有点小无语，-的前后都是硬编码，中间的字符是根据name转换过来的，但大小写字母基本都会转换成不可见字符，所以我这整了五个空格。发现name最多只能到数字，笑死。
+
+![image-20240408135139545](./reverse.assets/image-20240408135139545.png)
+
+```python
+def crackme147():
+    ebx = 0x1
+    # name = '     '
+    # for i in range(0, len(name)):
+    #     edx = ord(name[i])
+    #     ecx = ebx + 0x5
+    #     edx ^= ecx
+    #     edx += ord(name[i])
+    #     edx += 0xA
+    #     ebx += 1
+    #     print(chr(edx))
+    for alphabet in range(0x20, 0x80):
+        edx = alphabet
+        ecx = ebx + 0x5
+        edx ^= ecx
+        edx += alphabet
+        edx += 0xA
+        if edx >= 0x80:
+            print('没有啦，寄啦！')
+            return
+        print(chr(alphabet))
+```
+
+
+
+## 148-Crackme#0704
+
+按流程往下一顿F8，莫名其妙跳出来一行字符串，copy到password里就过了，用户名是固定的52Pojie。这行编码出自0x4572F0部分(会变动，告辞)，具体生成方式嫌麻烦没跟。
+
+```
+21DN99F322132D39922KE0
+```
+
+![image-20240408143044456](./reverse.assets/image-20240408143044456.png)
+
+
+
+## 149-b2c_2k5_1
+
+贼拉有意思的一道题，想起了之前做的那道call 558BEC的题目。
+
+首先serial是8位字符直接转成16进制作为eax寄存器的值，进行一系列变化之后要求循环右移十六位后是0xC390，且另外两个字节的和为0x285-0xC3-0x90，这都好解决，直到我发现了一个check。
+
+![image-20240408163252745](./reverse.assets/image-20240408163252745.png)
+
+在这个call之前，edi是雷打不动的0x111，结果要edi等于0，而这个ebx里存放的就是我们输入的值，也就是说我们的输入实际上也是代码的一部分，要将edi改为0。此外这里的90C3也很有提醒的味道，就像558BEC一样。
+
+![image-20240408162824247](./reverse.assets/image-20240408162824247.png)
+
+因此第一时间的反应就是xor edi,edi，由于栈由高地址向低地址生成，所以xor edi,edi对应的代码33FF实际输入是FF33。并且0xFF + 0x33正好补上了刚刚算出来的差，那肯定是没问题了。
+
+![image-20240408162429417](./reverse.assets/image-20240408162429417.png)
+
+```python
+def crackme149():
+    name = 'walex'
+    serial = 0x12345678
+    # 正向
+    # eax = serial ^ 0x52476433 ^ 0x52472456
+    # eax -= 0x4000000
+    # ebx = 0x10000
+    # for i in name:
+    #     edx = (ord(i) << 0x10)
+    #     eax += edx
+    #     eax -= ebx
+    # ebx = eax
+    target = 0xC390ff33
+    ebx = 0x10000
+    for i in name:
+        edx = (ord(i) << 0x10)
+        target += ebx
+        target -= edx
+    target += 0x4000000
+    target ^= 0x52476433 ^ 0x52472456
+    print(hex(target))
+```
+
+
+
+## 150-mucki-crackme2
+
+![image-20240408165746530](./reverse.assets/image-20240408165746530.png)
+
+```python
+def crackme150():
+    name = 'yuuka'
+    ecx = 0
+    for i in name:
+        ebx = eax = ord(i)
+        eax <<= 0x4
+        ebx >>= 0x5
+        eax ^= ebx
+        eax += 0x26
+        eax ^= ecx
+        ecx += eax
+    eax = 0xC0DEF
+    eax -= ecx
+    eax *= eax
+    print('CM2-' + hex(ecx)[2:].upper() + '-' + hex(eax & 0xFFFFFFFF)[2:].upper())
+```
+
+
+
+## 151-D4ph1 - Crackme#1
+

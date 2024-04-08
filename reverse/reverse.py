@@ -2469,5 +2469,86 @@ def crackme146():
 
 
 def crackme147():
+    ebx = 0x1
+    # name = '     '
+    # for i in range(0, len(name)):
+    #     edx = ord(name[i])
+    #     ecx = ebx + 0x5
+    #     edx ^= ecx
+    #     edx += ord(name[i])
+    #     edx += 0xA
+    #     ebx += 1
+    #     print(chr(edx))
+    for alphabet in range(0x20, 0x80):
+        edx = alphabet
+        ecx = ebx + 0x5
+        edx ^= ecx
+        edx += alphabet
+        edx += 0xA
+        if edx >= 0x80:
+            print('没有啦，寄啦！')
+            return
+        print(chr(alphabet))
 
-crackme147()
+
+def crackme148():
+    name = '21DN99F322132D39922KE0'
+    print(len(name))
+
+
+def crackme149():
+    name = 'walex'
+    serial = 0x12345678
+    # 正向
+    # eax = serial ^ 0x52476433 ^ 0x52472456
+    # eax -= 0x4000000
+    # ebx = 0x10000
+    # for i in name:
+    #     edx = (ord(i) << 0x10)
+    #     eax += edx
+    #     eax -= ebx
+    # ebx = eax
+    target = 0xC390ff33
+    ebx = 0x10000
+    for i in name:
+        edx = (ord(i) << 0x10)
+        target += ebx
+        target -= edx
+    target += 0x4000000
+    target ^= 0x52476433 ^ 0x52472456
+    print(hex(target))
+
+
+def crackme150():
+    name = 'yuuka'
+    ecx = 0
+    for i in name:
+        ebx = eax = ord(i)
+        eax <<= 0x4
+        ebx >>= 0x5
+        eax ^= ebx
+        eax += 0x26
+        eax ^= ecx
+        ecx += eax
+    eax = 0xC0DEF
+    eax -= ecx
+    eax *= eax
+    print('CM2-' + hex(ecx)[2:].upper() + '-' + hex(eax & 0xFFFFFFFF)[2:].upper())
+
+
+def crackme151():
+    name = 'walexw'
+    hardcode = [0x04, 0x51, 0xF, 0x06, 0x2C, 0x46]
+    hardcode_xor = []
+    serial = ''
+    edx = len(name)
+    for i in range(0, len(name)):
+        al = ord(name[i])
+        hardcode_xor.append(al ^ hardcode[i])
+        ebx = al ^ edx
+        edx -= 1
+        serial += chr(ebx)
+    serial += '-'
+    print(serial)
+
+crackme151()
