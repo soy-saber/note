@@ -5078,3 +5078,135 @@ def crackme150():
 
 ## 151-D4ph1 - Crackme#1
 
+有点搞，40338C这行的-不仅是嗯拼进去的，而且目的是为了cmp完前六个字符的时候成功跳出去。不是哥，遇到00跳出这种最普通的字符串cmp是没见过嘛
+
+![image-20240410110749054](./reverse.assets/image-20240410110749054.png)
+
+![image-20240410111427206](./reverse.assets/image-20240410111427206.png)
+
+```python
+def crackme151():
+    name = 'walexw'
+    hardcode = [0x04, 0x51, 0xF, 0x06, 0x2C, 0x46]
+    hardcode_xor = []
+    serial = ''
+    edx = len(name)
+    for i in range(0, len(name)):
+        al = ord(name[i])
+        hardcode_xor.append(al ^ hardcode[i])
+        ebx = al ^ edx
+        edx -= 1
+        serial += chr(ebx)
+    print(serial)
+```
+
+
+
+## 152-bad_sector-CrackMe#1
+
+![image-20240410114505706](./reverse.assets/image-20240410114505706.png)
+
+```python
+def crackme152():
+    name = 'walex'
+    esi = 0
+    for i in name:
+        eax = ord(i) * 0x4
+        esi += eax
+    ebx = 0x654789
+    for i in name[::-1]:
+        eax = ord(i)
+        ebx -= 1
+        eax = (ebx * 0x2) & 0xFFFFFFFF
+        ebx = (eax + ebx) & 0xFFFFFFFF
+        ebx -= 1
+    serial = 'BS-' + hex(ebx)[2:].upper() + '-' + str(esi)
+    print(serial)
+```
+
+
+
+## 153-Cobra's-Crackme
+
+程序的register是灰的，没思路。看了眼视频说和注册表有关，发现其他几个注册表api下断会出问题，就这个能用。
+
+![image-20240410144602493](./reverse.assets/image-20240410144602493.png)
+
+![image-20240410144717086](./reverse.assets/image-20240410144717086.png)
+
+这代码写的恶心死我了，真不难，真恶心，没一点逻辑的东西。
+
+![image-20240410172708202](./reverse.assets/image-20240410172708202.png)
+
+狗屎一样的注册机，简直就是裹脚布。
+
+![image-20240410174124354](./reverse.assets/image-20240410174124354.png)
+
+```python
+def crackme153():
+    name = 'walex'
+    local3 = len(name)
+    local39 = 0
+    name1 = name[0:-1]
+    for i in name1:
+        eax = ord(i)
+        local4 = eax
+        if local39 == 0:
+            eax = local4 + 0x5
+        else:
+            local40 = ord(name[0])
+            local40 += local4
+            eax = local40
+        local4 = eax ^ 0x12C
+        eax = edx = local4
+        eax <<= 0x2
+        eax += edx
+        eax <<= 0x2
+        eax >>= 0x2
+        edx = 0xF0F0F0F0
+        local4 = eax & edx
+        local39 += 1
+    store_local4 = local4
+
+    local5 = 0x5 ^ 0x12C
+    edx = local5
+    eax = edx
+    eax <<= 0x2
+    eax += edx
+    eax <<= 0x2
+    eax >>= 0x2
+    edx = 0xF0F0F0F0
+    local5 = eax & edx
+    print(hex(local5))
+    for i in range(4, 0, -1):
+        eax = ord(name[i])
+        local5 = eax
+        if i == 4:
+            local42 = 0
+        else:
+            local42 = ord(name[i+1])
+        local5 += local42
+        print('sum:' + hex(local5))
+        local42 = local5
+        local5 ^= 0x12C
+        eax = edx = local5
+        eax <<= 0x2
+        eax += edx
+        eax <<= 0x2
+        eax >>= 0x2
+        edx = 0xF0F0F0F0
+        local5 = eax & edx
+    local5 += store_local4
+    serial = 'REG-' + hex(store_local4)[2:].upper() + '-' + hex(local5)[2:].upper() +'-KEY'
+    print(serial)
+```
+
+
+
+## 154-cpp_crackme1
+
+对和输入有关的api下断点，在name in current module下到这两个api然后F9会直接停止运行，难顶。
+
+![image-20240410175753263](./reverse.assets/image-20240410175753263.png)
+
+断到这发现和预期还是不太一样。

@@ -2548,7 +2548,84 @@ def crackme151():
         ebx = al ^ edx
         edx -= 1
         serial += chr(ebx)
-    serial += '-'
     print(serial)
 
-crackme151()
+
+def crackme152():
+    name = 'walex'
+    esi = 0
+    for i in name:
+        eax = ord(i) * 0x4
+        esi += eax
+    ebx = 0x654789
+    for i in name[::-1]:
+        eax = ord(i)
+        ebx -= 1
+        eax = (ebx * 0x2) & 0xFFFFFFFF
+        ebx = (eax + ebx) & 0xFFFFFFFF
+        ebx -= 1
+    serial = 'BS-' + hex(ebx)[2:].upper() + '-' + str(esi)
+    print(serial)
+
+
+def crackme153():
+    name = 'yuuka'
+    local3 = len(name)
+    local39 = 0
+    for i in range(0, len(name)):
+        eax = ord(name[i])
+        local4 = eax
+        if local39 == 0:
+            eax = local4 + 0x5
+        else:
+            local40 = ord(name[i-1])
+            local40 += local4
+            eax = local40
+        local4 = eax ^ 0x12C
+        eax = edx = local4
+        eax <<= 0x2
+        eax += edx
+        eax <<= 0x2
+        eax >>= 0x2
+        edx = 0xF0F0F0F0
+        local4 = eax & edx
+        local39 += 1
+    store_local4 = local4
+    print(hex(store_local4))
+
+    local5 = 0x5 ^ 0x12C
+    edx = local5
+    eax = edx
+    eax <<= 0x2
+    eax += edx
+    eax <<= 0x2
+    eax >>= 0x2
+    edx = 0xF0F0F0F0
+    local5 = eax & edx
+    for i in range(4, 0, -1):
+        eax = ord(name[i])
+        local5 = eax
+        if i == 4:
+            local42 = 0
+        else:
+            local42 = ord(name[i+1])
+        local5 += local42
+        local42 = local5
+        local5 ^= 0x12C
+        eax = edx = local5
+        eax <<= 0x2
+        eax += edx
+        eax <<= 0x2
+        eax >>= 0x2
+        edx = 0xF0F0F0F0
+        local5 = eax & edx
+    print(hex(local5))
+    local5 += store_local4
+    serial = 'REG-' + hex(store_local4)[2:].upper() + '-' + hex(local5)[2:].upper() +'-KEY'
+    print(serial)
+
+
+
+
+
+crackme153()
