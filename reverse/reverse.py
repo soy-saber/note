@@ -2621,11 +2621,41 @@ def crackme153():
         local5 = eax & edx
     print(hex(local5))
     local5 += store_local4
-    serial = 'REG-' + hex(store_local4)[2:].upper() + '-' + hex(local5)[2:].upper() +'-KEY'
+    serial = 'REG-' + hex(store_local4)[2:].upper() + '-' + hex(local5)[2:].upper() + '-KEY'
+    print(serial)
+
+
+def crackme154():
+    name = 'walex'
+    serial = ''
+    bl = 0
+    pos_407030 = [0x16, 0x0F, 0x17, 0x11, 0x02, 0x10, 0x0c, 0x16, 0x0d, 0x07, 0x00, 0x11, 0x02, 0x00, 0x08, 0x0e, 0x06, 0x52, 0x16,
+                  0x0f, 0x17, 0x11, 0x02, 0x10, 0x0c, 0x16, 0x0d, 0x07, 0x00, 0x11]
+    transform1 = []
+    for i in range(0, len(name)):
+        cl = ord(name[i])
+        al = bl
+        al += 1
+        cl ^= al
+        transform1.append(cl)
+        bl += 1
+    while bl < len(pos_407030):
+        eax = pos_407030[bl]
+        ecx = 0x39
+        eax ^= 0x5A
+        eax += bl
+        dl = eax % ecx
+        dl += 0x41
+        bl += 1
+        transform1.append(dl)
+
+    for i in transform1:
+        serial += chr(i)
+    print(len(serial))
     print(serial)
 
 
 
 
 
-crackme153()
+crackme154()
