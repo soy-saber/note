@@ -2626,12 +2626,14 @@ def crackme153():
 
 
 def crackme154():
-    name = 'walex'
-    serial = ''
+    name = 'yuuka'
     bl = 0
     pos_407030 = [0x16, 0x0F, 0x17, 0x11, 0x02, 0x10, 0x0c, 0x16, 0x0d, 0x07, 0x00, 0x11, 0x02, 0x00, 0x08, 0x0e, 0x06, 0x52, 0x16,
                   0x0f, 0x17, 0x11, 0x02, 0x10, 0x0c, 0x16, 0x0d, 0x07, 0x00, 0x11]
     transform1 = []
+    transform2 = []
+    transform3 = []
+    calc_result = []
     for i in range(0, len(name)):
         cl = ord(name[i])
         al = bl
@@ -2648,14 +2650,53 @@ def crackme154():
         dl += 0x41
         bl += 1
         transform1.append(dl)
-
-    for i in transform1:
+    # 每两个字母交换位置
+    for i in range(0, len(transform1), 2):
+        transform2.append(transform1[i+1])
+        transform2.append(transform1[i])
+    eax = 0
+    for dl in transform2:
+        eax = (eax & 0xFFFFFF00) + dl
+        eax = ror(eax)
+        al = eax & 0xFF
+        transform3.append(al)
+    for i in range(0, len(transform1)):
+        eax = transform1[i]
+        if transform3[i] & 0x80:
+            edx = transform3[i] | 0xFFFFFF00
+        else:
+            edx = transform3[i]
+        esi = eax
+        eax = (eax * edx) & 0xFFFFFFFF
+        esi ^= edx
+        esi = (eax + esi) & 0xFFFFFFFF
+        calc_result.append(esi)
+    calc_result2 = []
+    for i in range(0, 15):
+        edx = calc_result[i+15]
+        edi = calc_result[i]
+        edi = (edi + edx) & 0xFFFFFFFF
+        calc_result2.append(edi)
+    calc_result3 = []
+    for i in calc_result2:
+        esi = 0x9
+        eax = i & 0xFF
+        dl = eax % esi
+        calc_result3.append(dl+0x30)
+    ecx = pos_407030 = 0x16
+    ecx ^= 0x63
+    edx = pos_407034 = 0xF
+    edx ^= 0x63
+    eax = pos_407038 = 0x17
+    eax ^= 0x63
+    serial = ''
+    serial += chr(ecx) + chr(edx) + chr(eax) + '-'
+    for i in calc_result3:
         serial += chr(i)
-    print(len(serial))
-    print(serial)
+    serial += '-' + chr(0x53 ^ 0x63) + chr(0x52 ^ 0x63) + chr(0x63 ^ 0x57) + chr(0x52 ^ 0x63)
+    print(serial.upper())
 
 
-
-
-
-crackme154()
+def carckme155():
+    
+crackme155()
