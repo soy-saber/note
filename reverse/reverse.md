@@ -5292,5 +5292,95 @@ def crackme154():
 
 ## 155-tc.13
 
-整个check函数居然在成功字符串打头的函数里面，没想到。
+整个check函数居然在成功字符串打头的函数里面，没想到。call了半天，毛用没有。
+
+![image-20240415110100208](./reverse.assets/image-20240415110100208.png)
+
+```python
+def crackme155():
+    name = 'walex'
+    # serial每位大name 3
+    # reg每位小name 3
+    serial = ''
+    regcode = ''
+    for i in name:
+        serial += chr(ord(i)+3)
+    print(serial)
+    for i in name:
+        regcode += chr(ord(i)-3)
+    print(regcode)
+```
+
+
+
+## 156-Olivers-crackme
+
+![image-20240415142531845](./reverse.assets/image-20240415142531845.png)
+
+```python
+def crackme156():
+    name = 'yuukaw'
+    serial = ''
+    reverse_name = name[::-1]
+    local5 = ''
+    for i in range(0, len(name)-1):
+        local5 += name[i] + str(ord(reverse_name[i]))
+    print(local5)
+    local3 = ''
+    for i in local5[1:-1]:
+        local3 += i * 2
+    local5 = ''
+    print(local3)
+    for i in local3[0:-1]:
+        local5 += str(ord(i))
+    local3 = ''
+    print(local5)
+    ebx = 0x3
+    while ebx != 0x30:
+        local3 += local5[ebx-1]
+        ebx += 0x3
+    print(local3)
+    ebx = 1
+    while ebx <= len(local3):
+        eax = len(name) + ebx
+        temp = int(local5[eax-0x3])
+        eax = int(local3[ebx-0x1])
+        # abs
+        if eax >= temp:
+            eax -= temp
+        else:
+            eax = 0x100000000 - temp + eax
+            temp = 0xFFFFFFFF
+            eax ^= temp
+            eax += 1
+        serial += str(eax)
+        ebx += 1
+    print(serial)
+```
+
+
+
+## 157-laFarge-crackme.0.2
+
+![image-20240415151850349](./reverse.assets/image-20240415151850349.png)
+
+```python
+def crackme157():
+    hardcode = '_r <()<1-Z2[l5,^'
+    ebx = 0x19
+    name = 'yuukaw'
+    esi = 0
+    trans = ''
+    serial = ''
+    while esi < 0x10:
+        eax = ord(name[esi % len(name)])
+        edx = ord(hardcode[esi])
+        eax ^= edx
+        dl = eax % ebx + 0x41
+        trans += chr(dl)
+        esi += 1
+    for i in range(0, len(trans), 4):
+        serial += trans[i:i+4] + '-'
+    print(serial[:-1])
+```
 
