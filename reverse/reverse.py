@@ -2770,4 +2770,52 @@ def crackme157():
     print(serial[:-1])
 
 
-crackme157()
+def crackme158():
+    target1 = 0x18D
+    target2 = 0x18c
+    target3 = 0x190
+    target4 = 0x188
+    target5 = 0x186
+    trans1 = chr(target1 // 5) * 4 + chr(target1 - target1 // 5 * 4)
+    trans2 = chr(target2 // 5) * 4 + chr(target2 - target2 // 5 * 4)
+    trans3 = chr(target3 // 5) * 4 + chr(target3 - target3 // 5 * 4)
+    trans4 = chr(target4 // 5) * 4 + chr(target4 - target4 // 5 * 4)
+    trans5 = chr(target5 // 5) * 4 + chr(target5 - target5 // 5 * 4)
+    print(trans1 + '-' + trans2 + '-' + trans3 + '-' + trans4 + '-' + trans5)
+
+
+def crackme159():
+    name = 'walex'
+    name = 'DiKeN' + name
+    eax = 0xFFFFFFFF
+    edi = 0x403E1A
+    # 假装有个数组
+    hardcode = []
+    for i in name:
+        eax ^= ord(i)
+        temp = eax
+        eax &= 0xFF
+        # print(hex(edi + eax * 4))
+        # 抽象数组
+        # ebx = hardcode[edi + eax * 4]
+        eax = temp
+        eax = eax >> 8
+        # eax ^= ebx
+    eax ^= 0xFFFFFFFF
+    # result 0xd3c1d6a7
+    print(0xd3c1d6a7)
+
+
+def crackme160():
+    name = 'BytePtr [e!]' + 'walex'
+    # 谁爱注册谁注册
+
+
+def crackme161():
+    ebx = 0x3ADAFFCF
+    for i in range(0, 16):
+        ebx = ror(ebx)
+    ebx ^= 0xDEAF
+    print(ebx)
+
+crackme161()

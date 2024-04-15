@@ -5384,3 +5384,75 @@ def crackme157():
     print(serial[:-1])
 ```
 
+
+
+## 158-salazan-keygenme#0001
+
+![image-20240415170204823](./reverse.assets/image-20240415170204823.png)
+
+```python
+def crackme158():
+    target1 = 0x18D
+    target2 = 0x18c
+    target3 = 0x190
+    target4 = 0x188
+    target5 = 0x186
+    trans1 = chr(target1 // 5) * 4 + chr(target1 - target1 // 5 * 4)
+    trans2 = chr(target2 // 5) * 4 + chr(target2 - target2 // 5 * 4)
+    trans3 = chr(target3 // 5) * 4 + chr(target3 - target3 // 5 * 4)
+    trans4 = chr(target4 // 5) * 4 + chr(target4 - target4 // 5 * 4)
+    trans5 = chr(target5 // 5) * 4 + chr(target5 - target5 // 5 * 4)
+    print(trans1 + '-' + trans2 + '-' + trans3 + '-' + trans4 + '-' + trans5)
+```
+
+
+
+## 159-CRC32crackme
+
+这道题根据eax会到内存里取一个值到ebx中，可能性共有0x100 256种，复制到程序里太麻烦了，意思意思。
+
+![image-20240415173128362](./reverse.assets/image-20240415173128362.png)
+
+![image-20240415173656893](./reverse.assets/image-20240415173656893.png)
+
+```python
+def crackme159():
+    name = 'walex'
+    name = 'DiKeN' + name
+    eax = 0xFFFFFFFF
+    edi = 0x403E1A
+    # 假装有个数组
+    hardcode = []
+    for i in name:
+        eax ^= ord(i)
+        temp = eax
+        eax &= 0xFF
+        # print(hex(edi + eax * 4))
+        # 抽象数组
+        # ebx = hardcode[edi + eax * 4]
+        eax = temp
+        eax = eax >> 8
+        # eax ^= ebx
+    eax ^= 0xFFFFFFFF
+    # result 0xd3c1d6a7
+    print(0xd3c1d6a7)
+```
+
+
+
+## 160-MD5-BytePtr-kgme1
+
+有病？纯计算的循环我按F8按了一分钟，谁爱写注册机谁写。
+
+![image-20240415174814770](./reverse.assets/image-20240415174814770.png)
+
+直接改jz了，难绷。
+
+![image-20240415175027099](./reverse.assets/image-20240415175027099.png)
+
+![image-20240415175054000](./reverse.assets/image-20240415175054000.png)
+
+
+
+## 161-password-crackme
+
