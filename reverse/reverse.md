@@ -5456,3 +5456,25 @@ def crackme159():
 
 ## 161-password-crackme
 
+实际顺序。需要通过两次add esp，0x10让程序返回到预期位置。
+
+![image-20240416142431608](./reverse.assets/image-20240416142431608.png)
+
+![image-20240416143102642](./reverse.assets/image-20240416143102642.png)
+
+
+
+## 162-moons_kgme_1
+
+![image-20240416145117379](./reverse.assets/image-20240416145117379.png)
+
+```python
+def crackme162():
+    name = 'yuukaw'
+    serial = ''
+    for i in name:
+        dl = ord(i) + 0x5
+        serial += chr(dl)
+    print(serial)
+```
+

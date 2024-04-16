@@ -2816,6 +2816,19 @@ def crackme161():
     for i in range(0, 16):
         ebx = ror(ebx)
     ebx ^= 0xDEAF
+    ebx = 0x100000000 - ebx
+    # 产生了借位，改成加
+    # ebx -= 0x2000
+    ebx += 0xE000
     print(ebx)
+    print(hex(ebx))
 
-crackme161()
+
+def crackme162():
+    name = 'yuukaw'
+    serial = ''
+    for i in name:
+        dl = ord(i) + 0x5
+        serial += chr(dl)
+    print(serial)
+crackme162()
