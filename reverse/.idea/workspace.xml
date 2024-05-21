@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b890b3b5-bbcb-4d1e-8070-6bd629666269" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reverse.md" beforeDir="false" afterPath="$PROJECT_DIR$/reverse.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reverse.py" beforeDir="false" afterPath="$PROJECT_DIR$/reverse.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
