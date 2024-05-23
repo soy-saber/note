@@ -284,7 +284,47 @@ sh.interactive()
 
 ![image-20240522181132772](./pwn.assets/image-20240522181132772.png)
 
-据ctfwiki，ret到了gets的位置，但后面的pop_ebx，包括buf2没有理解这是想干嘛（
+据ctfwiki，ret到了gets的位置，但后面的pop_ebx，包括buf2能理解这是想干嘛，但是不理解操作是如何达到该效果的。如112字节溢出将ret覆盖为了gets_plt，此时应该是call了get函数，那pop_ebx和buf2是如何参与后续操作的。
 
 ![image-20240522181706475](./pwn.assets/image-20240522181706475.png)
+
+**gets_plt：**gets函数的地址
+
+**system_plt：**system函数的地址
+
+**pop_ebx:** 控制ebx gadget的位置
+
+**buf2：**缓冲区位置
+
+问gpt的时候给我画了这么个堆栈的图，不知道栈顶的buf2是怎么来的。
+
+![image-20240523104807883](./pwn.assets/image-20240523104807883.png)
+
+call了一下ede求助，他说到x86架构上使用的调用约定：先压参数，再压ret，因此对gets_plt来说pop_ebx就是返回地址，而buf2就是参数。恍然大悟的同时也惊讶这payload还挺精致的。
+
+总结一下：思路没有转变过来，对栈的理解不够深入。我没有把pop_ebx当成一个返回地址，而是当成了一个类似主动调用的call，只看到了pop_ebx和buf2的联动，孤立了gets_plt。
+
+
+
+#### 7、ret2libc3
+
+checksec开了NX保护。
+
+```
+system 函数属于 libc，而 libc.so 动态链接库中的函数之间相对偏移是固定的。
+即使程序有 ASLR 保护，也只是针对于地址中间位进行随机，最低的 12 位并不会发生改变。而 libc 在 github 上有人进行收集，如下
+https://github.com/niklasb/libc-database
+```
+涉及到了PLT和GOT的相关知识，做一下记录
+
+https://blog.csdn.net/linyt/article/details/51635768
+
+![image-20240523174650531](./pwn.assets/image-20240523174650531.png)
+
+![image-20240523150910668](./pwn.assets/image-20240523150910668.png)
+
+```
+https://saku376.github.io/2021/04/30/%E9%80%9A%E8%BF%87GDB%E8%B0%83%E8%AF%95%E7%90%86%E8%A7%A3GOT%E8%A1%A8%E5%92%8CPLT%E8%A1%A8/
+总结来说就是，GOT保存了程序中所要调用的函数的地址，运行一开时其表项为空，会在运行时实时的更新表项。一个符号调用在第一次时会解析出绝对地址更新到GOT中，第二次调用时就直接找到了GOT表项所存储的函数地址直接调用了。
+```
 
